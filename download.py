@@ -4,7 +4,9 @@ import requests
 from bs4 import BeautifulSoup, SoupStrainer, Doctype
 import re
 from urllib.parse import urljoin, urlsplit
+from urllib.error import URLError
 from collections import namedtuple
+import sqlalchemy
 
 Episode = namedtuple("Episode", ['number', 'season', 'scenes'])
 
@@ -28,8 +30,9 @@ def parseEpisodePage(url):
     if match:
         season, episode = match.groups()
     else:
-        raise ValueError("Unexpected URL format: {}".format(url))
+        raise URLError("Unexpected URL format: {}".format(url))
 
+    # request the page
     req = requests.get(url)
     req.raise_for_status()
 
@@ -58,18 +61,26 @@ def parseEpisodePage(url):
     return Episode(episode, season, (parseScene(st) for st in scene_texts))
 
 
+def setupDb(filename=None):
+    engine = sqlalchemy.create_engine("sqlite:///:memory", echo=True)
 
-root = "http://www.officequotes.net/index.php"
+def main():
+    root = "http://www.officequotes.net/index.php"
+    req = requests.get(root)
+    req.raise_for_status()
 
-req = requests.get(root)
-req.raise_for_status()
+    eps_link_re = re.compile("no\d-\d+.php")
+    eps_links = filter(lambda link: hasattr(link, "href"), BeautifulSoup(req.content, "lxml", parse_only=SoupStrainer("a", href=eps_link_re)))
 
-eps_link_re = re.compile("no\d-\d+.php")
-eps_links = filter(lambda link: hasattr(link, "href"), BeautifulSoup(req.content, "lxml", parse_only=SoupStrainer("a", href=eps_link_re)))
+    try:
+        #episodes = (parseEpisodePage(urljoin(root, link["href"])) for link in eps_links)
+        for link in eps_links:
+            url = urljoin(root, link["href"])
+            print(url)
+            parseEpisodePage(url)
+            break
+    except (URLError, requests.http.HTTPError) as e:
+        print("Parsing ({}) failed with error: {}".format(url, e))
 
-#episodes = (parseEpisodePage(urljoin(root, link["href"])) for link in eps_links)
-for link in eps_links:
-    print(urljoin(root, link["href"]))
-    parseEpisodePage(urljoin(root, link["href"]))
-    break
 
+main()
