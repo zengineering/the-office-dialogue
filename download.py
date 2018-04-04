@@ -3,22 +3,10 @@
 import requests
 from bs4 import BeautifulSoup, SoupStrainer, Doctype
 import re
-from itertools import zip_longest, islice
+from urllib.parse import urljoin, urlsplit
+from collections import namedtuple
 
-def grouper(iterable, n, fillvalue=None):
-    '''
-    Collect data into fixed-length chunks or blocks
-    grouper('ABCDEFG', 3, 'x') --> ABC DEF Gxx"
-    '''
-    args = [iter(iterable)] * n
-    return zip_longest(*args, fillvalue=fillvalue)
-
-def peek(gen):
-    '''
-    look at the next value in a generator but maintain generator state
-    '''
-    next_value = next(gen)
-    return next_value, chain([next_value], gen)
+Episode = namedtuple("Episode", ['number', 'season', 'scenes'])
 
 def parseScene(scene_text):
     # split on newlines and remove empty items
@@ -36,6 +24,12 @@ def parseScene(scene_text):
 
 
 def parseEpisodePage(url):
+    match = re.fullmatch("\/no(\d)-(\d+).php", urlsplit(url).path)
+    if match:
+        season, episode = match.groups()
+    else:
+        raise ValueError("Unexpected URL format: {}".format(url))
+
     req = requests.get(url)
     req.raise_for_status()
 
@@ -60,13 +54,12 @@ def parseEpisodePage(url):
     # remove Doctype if nessessary; extract text from each quote block
     scene_texts = [quote.text for quote in filter(lambda q: type(q) is not Doctype, soup)]
 
-    # return [ [(speaker, spoken)], <deleted scene?> ]
-    return (parseScene(st) for st in scene_texts)
+    # return [ season, episode, [(speaker, spoken)], <deleted scene?> ]
+    return Episode(episode, season, (parseScene(st) for st in scene_texts))
 
 
 
-root = "http://www.officequotes.net"
-index = "{}/index.php".format(root)
+root = "http://www.officequotes.net/index.php"
 
 req = requests.get(root)
 req.raise_for_status()
@@ -74,10 +67,9 @@ req.raise_for_status()
 eps_link_re = re.compile("no\d-\d+.php")
 eps_links = filter(lambda link: hasattr(link, "href"), BeautifulSoup(req.content, "lxml", parse_only=SoupStrainer("a", href=eps_link_re)))
 
+#episodes = (parseEpisodePage(urljoin(root, link["href"])) for link in eps_links)
 for link in eps_links:
-    print(link["href"])
-    getEpisodeQuotes("{}/{}".format(root, link["href"]))
+    print(urljoin(root, link["href"]))
+    parseEpisodePage(urljoin(root, link["href"]))
     break
 
-
-#naveps = soup.find_all("div", {"class": "navEp"})[0]
