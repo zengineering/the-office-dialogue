@@ -15,11 +15,13 @@ Episode = namedtuple("Episode", ['number', 'season', 'scenes'])
 Quote = namedtuple("Quote", ['speaker', 'line'])
 Scene = namedtuple("Scene", ['quotes', 'deleted'])
 
+def removeDoctypes(soup):
+    return filter(lambda t: not isinstance(t, Doctype), soup)
 
 def parseEpisodePage(content):
     # parse only <div class="quote"> blocks
-    # NOTE: SoupStrainer does not remove Doctype; filter later
-    soup = BeautifulSoup(content, "lxml", parse_only=SoupStrainer("div", {"class": "quote"}))
+    # NOTE: filter Doctype because SoupStrainer does not remove them
+    soup = removeDoctypes(BeautifulSoup(content, "lxml", parse_only=SoupStrainer("div", {"class": "quote"})))
 
     # remove font setting (<b>, <i>, <u>) tags
     tags_to_remove = ("b", "i", "u")
@@ -36,7 +38,7 @@ def parseEpisodePage(content):
         spacer.decompose()
 
     # remove Doctype if nessessary; extract text from each quote block
-    scene_texts = [quote_div.text for quote_div in filter(lambda q: not isinstance(q, Doctype), soup)]
+    scene_texts = [quote_div.text for quote_div in soup]
 
     # return [ season, episode, [(speaker, spoken)], <deleted scene?> ]
     return (parseScene(st) for st in scene_texts)
@@ -70,31 +72,36 @@ def writeToDatabase(episode, db):
 
 
 def fetchPage(url):
+    '''
+    Request a url and return the contents
+    '''
     req = requests.get(url)
     req.raise_for_status()
     return req.content
 
 
-def getEpisodeUrls(index_url):
+def extractMatchingUrls(index_url, href):
+    # get the index page
     index_content = fetchPage(index_url)
-
-    # extract links to episode pages
-    eps_link_re = re.compile("no(\d)-(\d+).php")
-    return filter(lambda link: hasattr(link, "href"),
-        BeautifulSoup(index_content, "lxml", parse_only=SoupStrainer("a", href=eps_link_re)))
+    # extract the a tags with href's matching the re pattern
+    a_tags = BeautifulSoup(index_content, "lxml", parse_only=SoupStrainer("a", href=href))
+    # filter out Doctype's and extract the urls
+    return map(lambda a: a["href"], removeDoctypes(a_tags))
 
 
 def main():
     root_url = "http://www.officequotes.net/index.php"
-    eps_urls = getEpisodeUrls(root_url)
-    print (eps_urls)
+    eps_href_re = re.compile("no(\d)-(\d+).php")
+    eps_urls = extractMatchingUrls(root_url, eps_href_re)
+    print (list(eps_urls))
     return
 
     episodes = []
+
     try:
         #episodes = (parseEpisodePage(urljoin(root, link["href"])) for link in eps_links)
         for eps_url in map(lambda a: a["href"], eps_urls):
-            match = re.fullmatch(eps_link_re, eps_url["href"])
+            match = re.fullmatch(eps_href_re, eps_url["href"])
             if match:
                 season, episode = match.groups()
             else:
