@@ -6,9 +6,10 @@ import re
 from urllib.parse import urljoin, urlsplit
 from urllib.error import URLError
 from collections import namedtuple
-import sqlalchemy
 
 Episode = namedtuple("Episode", ['number', 'season', 'scenes'])
+Quote = namedtuple("Quote", ['speaker', 'line'])
+Scene = namedtuple("Scene", ['quotes', 'deleted'])
 
 def parseScene(scene_text):
     # split on newlines and remove empty items
@@ -20,9 +21,9 @@ def parseScene(scene_text):
     if deleted:
         scene = scene[1:]
 
-    line_pairs = map(lambda p: (p[0].strip(), p[1].strip()), (line.split(":", 1) for line in scene))
+    line_pairs = map(lambda p: Quote(p[0].strip(), p[1].strip()), (line.split(":", 1) for line in scene))
 
-    return line_pairs, deleted
+    return Scene(line_pairs, deleted)
 
 
 def parseEpisodePage(url):
@@ -55,14 +56,23 @@ def parseEpisodePage(url):
         spacer.decompose()
 
     # remove Doctype if nessessary; extract text from each quote block
-    scene_texts = [quote.text for quote in filter(lambda q: type(q) is not Doctype, soup)]
+    scene_texts = [quote_div.text for quote_div in filter(lambda q: type(q) is not Doctype, soup)]
 
     # return [ season, episode, [(speaker, spoken)], <deleted scene?> ]
     return Episode(episode, season, (parseScene(st) for st in scene_texts))
 
 
-def setupDb(filename=None):
-    engine = sqlalchemy.create_engine("sqlite:///:memory", echo=True)
+def writeToDatabase(episode, db):
+    for scene, (quotes, deleted) in enumerate(episode.scenes):
+        for speaker, line in quotes:
+            db.addQuote(OfficeQuote(
+                season=episode.season,
+                episode=episode.number,
+                scene=scene,
+                speaker=speaker,
+                line=line,
+                deleted=deleted))
+
 
 def main():
     root = "http://www.officequotes.net/index.php"
