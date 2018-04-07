@@ -1,21 +1,22 @@
 from bs4 import BeautifulSoup, SoupStrainer, Doctype
 from containers import Quote, Scene
 
+
 def removeDoctypes(soup):
     return filter(lambda t: not isinstance(t, Doctype), soup)
 
 
 def extractMatchingUrls(content, href):
     # extract the a tags with href's matching the re pattern
-    a_tags = BeautifulSoup(content, "lxml", parse_only=SoupStrainer("a", href=href))
+    a_tags = removeDoctypes(BeautifulSoup(content, "lxml", parse_only=SoupStrainer("a", href=href)))
     # filter out Doctype's and extract the urls
-    return map(lambda a: a["href"], removeDoctypes(a_tags))
+    return map(lambda a: a["href"], a_tags)
 
 
 def parseEpisodePage(content):
     # parse only <div class="quote"> blocks
     # NOTE: filter Doctype because SoupStrainer does not remove them
-    soup = removeDoctypes(BeautifulSoup(content, "lxml", parse_only=SoupStrainer("div", {"class": "quote"})))
+    soup = BeautifulSoup(content, "lxml", parse_only=SoupStrainer("div", {"class": "quote"}))
 
     # remove font setting (<b>, <i>, <u>) tags
     tags_to_remove = ("b", "i", "u")
@@ -32,7 +33,7 @@ def parseEpisodePage(content):
         spacer.decompose()
 
     # extract text from each quote block (scene)
-    scene_texts = [quote_div.text for quote_div in soup]
+    scene_texts = [quote_div.text for quote_div in removeDoctypes(soup)]
 
     return (parseScene(st) for st in scene_texts)
 

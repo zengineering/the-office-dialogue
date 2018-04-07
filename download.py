@@ -32,11 +32,10 @@ def fetchPage(url):
     return req.content
 
 
-
 def episodeFactory(eps_url, eps_url_pattern, index_url):
     try:
-        season, episode = map(int, re.fullmatch(eps_url_pattern, eps_url["href"]).groups())
-        url = urljoin(index_url, eps_url["href"])
+        season, episode = map(int, re.fullmatch(eps_url_pattern, eps_url).groups())
+        url = urljoin(index_url, eps_url)
         scenes = parseEpisodePage(fetchPage(url))
         return Episode(episode, season, scenes)
     except Exception as e:
@@ -45,17 +44,17 @@ def episodeFactory(eps_url, eps_url_pattern, index_url):
 
 
 def main():
+    # get the index page and all episode urls
     index_url = "http://www.officequotes.net/index.php"
     eps_href_re = re.compile("no(\d)-(\d+).php")
-    # get the index page
     index_content = fetchPage(index_url)
     eps_urls = extractMatchingUrls(index_content, eps_href_re)
-    print (list(eps_urls))
-    return
 
     episodes = Queue()
     for eps_url in eps_urls:
-        episodes.put(episodeFactory(eps_url, eps_href_re, index_url))
+        #episodes.put(episodeFactory(eps_url, eps_href_re, index_url))
+        episode = episodeFactory(eps_url, eps_href_re, index_url)
+        print(episode)
         break
 
 main()
