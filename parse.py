@@ -1,4 +1,5 @@
 from bs4 import BeautifulSoup, SoupStrainer, Doctype
+from containers import Quote, Scene
 
 def removeDoctypes(soup):
     return filter(lambda t: not isinstance(t, Doctype), soup)
