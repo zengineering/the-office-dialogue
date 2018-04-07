@@ -19,7 +19,7 @@ class OfficeQuote(Base):
     deleted = Column(Boolean)
 
     def __repr__(self):
-        return "<OfficeQuote(season={}, episode={}, scene={}, speaker={}, line={}, deleted={}".format(
+        return "<OfficeQuote(season={}, episode={}, scene={}, speaker={}, line={}, deleted={})>".format(
             self.season, self.episode, self.scene, self.speaker, self.line, self.deleted) 
 
 
@@ -59,10 +59,7 @@ class Database():
 
 if __name__ == "__main__":
 
-    from collections import namedtuple
-    Scene = namedtuple("Scene", ['quotes', 'deleted'])
-    Quote = namedtuple("Quote", ['speaker', 'line'])
-    Episode = namedtuple("Episode", ['number', 'season', 'scenes'])
+    from containers import Episode, Scene, Quote
 
     eps = Episode(
         2,
