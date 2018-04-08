@@ -55,6 +55,11 @@ class Database():
         with self.session_scope() as session:
             session.add(quote) # dialogLine instance
 
+    def addQuotes(self, quotes):
+        with self.session_scope() as session:
+            for quote in quotes:
+                session.add(quote) # dialogLine instance
+
 
 
 if __name__ == "__main__":

@@ -6,7 +6,6 @@ from urllib.parse import urljoin
 from queue import Queue
 from threading import Thread
 from sys import stderr
-from bs4 import HTMLParser
 from database import Database, OfficeQuote
 from containers import Episode
 from parse import extractMatchingUrls, parseEpisodePage
@@ -19,15 +18,17 @@ def episodeToDatabase(episode, db):
     Convert each quote in an episode into the database schema class
         and write them to a database.
     '''
+    office_quotes = []
     for scene_index, scene in enumerate(episode.scenes, 1):
         for quote in scene.quotes:
-            db.addQuote(OfficeQuote(
+            office_quotes.append(OfficeQuote(
                 season=episode.season,
                 episode=episode.number,
                 scene=scene_index,
                 speaker=quote.speaker,
                 line=quote.line,
                 deleted=scene.deleted))
+    db.addQuotes(office_quotes)
 
 
 def writeToDatabase(db, queue, eps_count):
@@ -71,8 +72,6 @@ def episodeFactory(eps_url, eps_url_pattern, index_url):
                 return Episode(episode, season, scenes)
     except requests.RequestException as e:
         print("Request for {} failed:\n\t{}".format(eps_url, e), stderr)
-    except HTMLParser.HTMLParseError as e:
-        print("Parsing for {} failed:\n\t{}".format(eps_url, e), stderr)
     except Exception as e:
         print("Episode from url {} failed:\n\t{}".format(eps_url, e), stderr)
 
