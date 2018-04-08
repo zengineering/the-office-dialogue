@@ -35,7 +35,8 @@ def parseEpisodePage(content):
     # extract text from each quote block (scene)
     scene_texts = [quote_div.text for quote_div in removeDoctypes(soup)]
 
-    return (parseScene(st) for st in scene_texts)
+    # filter empty qutoe blocks
+    return (parseScene(st) for st in scene_texts if st.strip())
 
 
 def parseScene(scene_text):
@@ -54,7 +55,7 @@ def parseScene(scene_text):
     for line in scene:
         pair = [s.strip() for s in line.split(":", 1)]
         if len(pair) != 2:
-            print("Unexpected line format: {}".format(line))
+            #print("Skipping line with unexpected format: {}".format(line))
             continue
         quotes.append(Quote(*pair))
 

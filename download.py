@@ -43,10 +43,13 @@ def writeToDatabase(db, queue, eps_count):
             if episode:
                 episodeToDatabase(episode, db)
                 successful += 1
+                print("Stored {} episodes successfully;".format(successful), end=" ")
         except Exception as e:
-            print("writeToDatabase failed with:\n{}".format(e))
+            print("writeToDatabase failed with:\n{}".format(e), file=stderr)
         finally:
             eps_count -= 1
+            print("{} episodes left\r".format(eps_count))
+
     return successful
 
 
@@ -56,7 +59,7 @@ def fetchContent(url):
     '''
     req = requests.get(url, headers=req_headers)
     req.raise_for_status()
-    return req.content
+    return req.text
 
 
 def episodeFactory(eps_url, eps_url_pattern, index_url):
@@ -72,11 +75,11 @@ def episodeFactory(eps_url, eps_url_pattern, index_url):
             if scenes:
                 return Episode(episode, season, scenes)
     except requests.RequestException as e:
-        print("Request for {} failed:\n\t{}".format(eps_url, e), stderr)
+        print("Request for {} failed:\n\t{}".format(eps_url, e), file=stderr)
     #except HTMLParseError as e:
     #    print("Parsing for {} failed:\n\t{}".format(eps_url, e), stderr)
     except Exception as e:
-        print("Episode from url {} failed:\n\t{}".format(eps_url, e), stderr)
+        print("Episode from url {} failed:\n\t{}".format(eps_url, e), file=stderr)
 
 
 def fetchAndParser(url_q, episode_q, failed_q, eps_href_re, index_url):
@@ -84,15 +87,14 @@ def fetchAndParser(url_q, episode_q, failed_q, eps_href_re, index_url):
         eps_url = url_q.get()
         print(eps_url)
         episode = episodeFactory(eps_url, eps_href_re, index_url)
-        if episode:
-            episode_q.put(episode)
-        else:
+        episode_q.put(episode)
+        if episode is None:
             failed_q.put(eps_url)
 
 
 
 def main():
-    num_threads = 1
+    num_threads = 32
     index_url = "http://www.officequotes.net/index.php"
     db_file = "office-quotes.sqlite"
     eps_href_re = re.compile("no(\d)-(\d+).php")
@@ -125,8 +127,9 @@ def main():
         t.join()
     db_thread.join()
 
-    print("The following pages failed to download:")
-    while not failed_q.empty():
-        print(failed_q.get())
+    if not failed_q.empty():
+        print("The following pages failed to download:")
+        while not failed_q.empty():
+            print(failed_q.get())
 
 main()
