@@ -50,6 +50,12 @@ def parseScene(scene_text):
 
     # each line in scene is of the format "Speaker: dialog line"
     # split on ":" (should result in list of len 2), strip any excess whitespace, and store in a Quote
-    line_pairs = map(lambda pair: Quote(*map(lambda s: s.strip(), pair)), (line.split(":", 1) for line in scene))
+    quotes = []
+    for line in scene:
+        pair = [s.strip() for s in line.split(":", 1)]
+        if len(pair) != 2:
+            print("Unexpected line format: {}".format(line))
+            continue
+        quotes.append(Quote(*pair))
 
-    return Scene(line_pairs, deleted)
+    return Scene(quotes, deleted)
