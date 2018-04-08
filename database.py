@@ -60,32 +60,3 @@ class Database():
             for quote in quotes:
                 session.add(quote) # dialogLine instance
 
-
-
-if __name__ == "__main__":
-    from containers import Episode
-    from download import episodeToDatabase
-
-    eps = Episode(
-        2,
-        3,
-        [ #scenes
-            ( # scene
-                [ # quotes
-                    ("Jim", "Bears beets battlestar"),
-                    ("Dwight", "Identity thief"),
-                ],
-                True # deleted
-            ),
-            ( # scene
-                [
-                    ("Pam", "Yep."),
-                    ("Oscar", "actually..."),
-                ],
-                False
-            )
-        ]
-    )
-
-    episodeToDatabase(eps, Database("testdb.sqlite"))
-
