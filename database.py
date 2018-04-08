@@ -26,7 +26,7 @@ class OfficeQuote(Base):
 class Database():
     def __init__(self, db_file=""):
         # create engine
-        self.engine = create_engine("sqlite:///{}".format(realpath(db_file)), echo=True)
+        self.engine = create_engine("sqlite:///{}".format(realpath(db_file)), echo=False)
 
         # create schema
         Base.metadata.create_all(self.engine)
@@ -58,8 +58,8 @@ class Database():
 
 
 if __name__ == "__main__":
-
-    from containers import Episode, Scene, Quote
+    from containers import Episode
+    from download import episodeToDatabase
 
     eps = Episode(
         2,
@@ -82,16 +82,5 @@ if __name__ == "__main__":
         ]
     )
 
-    def writeToDatabase(episode, db):
-        for scene, (quotes, deleted) in enumerate(episode.scenes):
-            for speaker, line in quotes:
-                db.addQuote(OfficeQuote(
-                    season=episode.season,
-                    episode=episode.number,
-                    scene=scene,
-                    speaker=speaker,
-                    line=line,
-                    deleted=deleted))
-
-    writeToDatabase(eps, Database("testdb.sqlite"))
+    episodeToDatabase(eps, Database("testdb.sqlite"))
 
