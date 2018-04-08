@@ -5,7 +5,8 @@ import attr
 class Episode():
     number = attr.ib(validator=attr.validators.instance_of(int))
     season = attr.ib(validator=attr.validators.instance_of(int))
-    scenes = attr.ib(validator=attr.validators.instance_of(Iterable), converter=list)
+    scenes = attr.ib(validator=attr.validators.instance_of(Iterable),
+                     converter=lambda itr: list(filter(lambda i: len(i.quotes) > 0, itr)))
 
     def __str__(self):
         return "<Episode(S{}E{}: {} scenes)>".format(self.season, self.number, len(self.scenes))
