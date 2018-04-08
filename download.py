@@ -9,6 +9,7 @@ from sys import stderr
 from database import Database, OfficeQuote
 from containers import Episode
 from parse import extractMatchingUrls, parseEpisodePage
+#from HTMLParser import HTMLParseError
 
 req_headers = {"User-Agent": "Mozilla/5.0 (X11; CrOS x86_64 10032.86.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.140 Safari/537.36"}
 
@@ -18,17 +19,17 @@ def episodeToDatabase(episode, db):
     Convert each quote in an episode into the database schema class
         and write them to a database.
     '''
-    office_quotes = []
+    quotes = []
     for scene_index, scene in enumerate(episode.scenes, 1):
         for quote in scene.quotes:
-            office_quotes.append(OfficeQuote(
+            quotes.append(OfficeQuote(
                 season=episode.season,
                 episode=episode.number,
                 scene=scene_index,
                 speaker=quote.speaker,
                 line=quote.line,
                 deleted=scene.deleted))
-    db.addQuotes(office_quotes)
+    db.addQuotes(quotes)
 
 
 def writeToDatabase(db, queue, eps_count):
@@ -72,38 +73,60 @@ def episodeFactory(eps_url, eps_url_pattern, index_url):
                 return Episode(episode, season, scenes)
     except requests.RequestException as e:
         print("Request for {} failed:\n\t{}".format(eps_url, e), stderr)
+    #except HTMLParseError as e:
+    #    print("Parsing for {} failed:\n\t{}".format(eps_url, e), stderr)
     except Exception as e:
         print("Episode from url {} failed:\n\t{}".format(eps_url, e), stderr)
 
 
+def fetchAndParser(url_q, episode_q, failed_q, eps_href_re, index_url):
+    while not url_q.empty():
+        eps_url = url_q.get()
+        print(eps_url)
+        episode = episodeFactory(eps_url, eps_href_re, index_url)
+        if episode:
+            episode_q.put(episode)
+        else:
+            failed_q.put(eps_url)
+
+
+
 def main():
+    num_threads = 1
     index_url = "http://www.officequotes.net/index.php"
     db_file = "office-quotes.sqlite"
     eps_href_re = re.compile("no(\d)-(\d+).php")
 
     # get the index page and all episode urls
     index_content = fetchContent(index_url)
-    eps_urls = list(extractMatchingUrls(index_content, eps_href_re))
+    eps_urls = extractMatchingUrls(index_content, eps_href_re)
 
-    episodes_q = Queue()
+    url_q = Queue()
+    episode_q = Queue()
+    failed_q = Queue()
     database = Database(db_file)
 
-    # consumer thread for writing each episode it receives in a queue to the database
-    db_thread = Thread(target=lambda: writeToDatabase(database, episodes_q, len(eps_urls)), name="database")
+    for url in eps_urls:
+        url_q.put(url)
 
-    # producer threads for fetching episode pages, converting to episode objects and pushing in the queue
-    eps_thread_func = lambda eps_url: episodes_q.put(episodeFactory(eps_url, eps_href_re, index_url))
-    threads = [Thread(target=eps_thread_func, name=eps_url, args=(eps_url,)) for eps_url in eps_urls]
+    # consumer thread for writing each episode it receives in a queue to the database
+    db_thread = Thread(target=lambda: writeToDatabase(database, episode_q, url_q.qsize()), name="database")
+
+    # producer threads for fetching and parsing episode pages
+    thread_pool = [Thread(target=fetchAndParser, args=(url_q, episode_q, failed_q, eps_href_re, index_url)) for _ in range(num_threads)]
 
     # start the threads
     db_thread.start()
-    for t in threads:
+    for t in thread_pool:
         t.start()
 
     # join the threads
-    for t in threads:
+    for t in thread_pool:
         t.join()
     db_thread.join()
 
+    print("The following pages failed to download:")
+    while not failed_q.empty():
+        print(failed_q.get())
 
 main()
