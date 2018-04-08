@@ -6,10 +6,10 @@ from urllib.parse import urljoin
 from queue import Queue
 from threading import Thread
 from sys import stderr
+from bs4 import HTMLParser
 from database import Database, OfficeQuote
 from containers import Episode
 from parse import extractMatchingUrls, parseEpisodePage
-from functools import partial
 
 req_headers = {"User-Agent": "Mozilla/5.0 (X11; CrOS x86_64 10032.86.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.140 Safari/537.36"}
 
@@ -64,10 +64,17 @@ def episodeFactory(eps_url, eps_url_pattern, index_url):
     try:
         season, episode = map(int, re.fullmatch(eps_url_pattern, eps_url).groups())
         url = urljoin(index_url, eps_url)
-        scenes = parseEpisodePage(fetchContent(url))
-        return Episode(episode, season, scenes)
+        content = fetchContent(url)
+        if content:
+            scenes = parseEpisodePage(content)
+            if scenes:
+                return Episode(episode, season, scenes)
+    except requests.RequestException as e:
+        print("Request for {} failed:\n\t{}".format(eps_url, e), stderr)
+    except HTMLParser.HTMLParseError as e:
+        print("Parsing for {} failed:\n\t{}".format(eps_url, e), stderr)
     except Exception as e:
-        print("Episode from url {} failed with the following error:\n{}".format(eps_url, e), stderr)
+        print("Episode from url {} failed:\n\t{}".format(eps_url, e), stderr)
 
 
 def main():
