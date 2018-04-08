@@ -19,14 +19,14 @@ class OfficeQuote(Base):
     deleted = Column(Boolean)
 
     def __repr__(self):
-        return "<OfficeQuote(season={}, episode={}, scene={}, speaker={}, line={}, deleted={}".format(
+        return "<OfficeQuote(season={}, episode={}, scene={}, speaker={}, line={}, deleted={})>".format(
             self.season, self.episode, self.scene, self.speaker, self.line, self.deleted) 
 
 
 class Database():
     def __init__(self, db_file=""):
         # create engine
-        self.engine = create_engine("sqlite:///{}".format(realpath(db_file)), echo=True)
+        self.engine = create_engine("sqlite:///{}".format(realpath(db_file)), echo=False)
 
         # create schema
         Base.metadata.create_all(self.engine)
@@ -58,11 +58,8 @@ class Database():
 
 
 if __name__ == "__main__":
-
-    from collections import namedtuple
-    Scene = namedtuple("Scene", ['quotes', 'deleted'])
-    Quote = namedtuple("Quote", ['speaker', 'line'])
-    Episode = namedtuple("Episode", ['number', 'season', 'scenes'])
+    from containers import Episode
+    from download import episodeToDatabase
 
     eps = Episode(
         2,
@@ -85,16 +82,5 @@ if __name__ == "__main__":
         ]
     )
 
-    def writeToDatabase(episode, db):
-        for scene, (quotes, deleted) in enumerate(episode.scenes):
-            for speaker, line in quotes:
-                db.addQuote(OfficeQuote(
-                    season=episode.season,
-                    episode=episode.number,
-                    scene=scene,
-                    speaker=speaker,
-                    line=line,
-                    deleted=deleted))
-
-    writeToDatabase(eps, Database("testdb.sqlite"))
+    episodeToDatabase(eps, Database("testdb.sqlite"))
 
