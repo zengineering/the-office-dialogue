@@ -9,6 +9,10 @@ from sys import stderr
 from database import Database, OfficeQuote
 from containers import Episode
 from parse import extractMatchingUrls, parseEpisodePage
+from functools import partial
+
+req_headers = {"User-Agent": "Mozilla/5.0 (X11; CrOS x86_64 10032.86.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.140 Safari/537.36"}
+
 
 def episodeToDatabase(episode, db):
     '''
@@ -44,11 +48,11 @@ def writeToDatabase(db, queue, eps_count):
     return successful
 
 
-def fetchContent(url, headers):
+def fetchContent(url):
     '''
     Request a url and return the contents.
     '''
-    req = requests.get(url, headers=headers)
+    req = requests.get(url, headers=req_headers)
     req.raise_for_status()
     return req.content
 
