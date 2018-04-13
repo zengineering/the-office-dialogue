@@ -1,0 +1,9 @@
+*.pyc
+*.log
+
+build
+*.class
+*.jar
+.gradle
+.m2
+!gradle-wrapper.jar
