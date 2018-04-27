@@ -20,10 +20,12 @@ plugins {
 }
 
 // Define the main class for the application
-mainClassName = 'TheOfficeKt'
+mainClassName = 'com.github.zengineering.TheOfficeKt'
 
 // start scripts for each main
 ext.multipleStartScripts = false
+
+group 'com.github.zengineering'
 
 // dependency versions
 ext {
@@ -84,7 +86,7 @@ if (ext.multipleStartScripts) {
     }
     
     def scripts = [ 
-        "TheOfficeKt" : "TheOfficeKt",
+        "TheOfficeKt" : "com.github.zengineering.TheOfficeKt",
     ]
     scripts.each() { scriptName, className ->
             def t = tasks.create(name: scriptName+'StartScript', type: CreateStartScripts) {
