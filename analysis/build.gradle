@@ -22,8 +22,8 @@ plugins {
 // Define the main class for the application
 mainClassName = 'TheOfficeKt'
 
-// multiple main's
-ext.multiMain = false
+// start scripts for each main
+ext.multipleStartScripts = false
 
 // dependency versions
 ext {
@@ -72,7 +72,7 @@ repositories {
     mavenCentral()
 }
 
-if (ext.multiMain) {
+if (ext.multipleStartScripts) {
     //=======================================
     // Create scripts for entry points
     // Subproject must apply application plugin to be able to call this method.
