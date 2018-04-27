@@ -13,16 +13,23 @@ plugins {
     // Apply the application plugin to add support for building an application
     id 'application'
 
+    // kotlin plugin
     id "org.jetbrains.kotlin.jvm" version "1.2.31"
 }
 
 // Define the main class for the application
 mainClassName = 'TheOffice'
 
+// dependency versions
+ext {
+    kotlin_argparser_version = '2.0.6'
+    querydsl_version = '4.2.1'
+    log4j12_version = '1.7.25'
+    jooq_version = '3.10.6'
+    jfree_version='1.0.13'
+}
 
 dependencies {
-    ext.kotlin_argparser_version = '2.0.6'
-
     // This dependency is found on compile classpath of this component and consumers.
     compile 'com.google.guava:guava:23.0'
 
@@ -32,13 +39,24 @@ dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 
     // https://github.com/xenomachina/kotlin-argparser
-    compile "com.xenomachina:kotlin-argparser:$kotlin_argparser_version"
+    compile group: 'com.xenomachina', name: 'kotlin-argparser', version: kotlin_argparser_version
 
-    // https://mvnrepository.com/artifact/jfree/jfreechart
-    compile group: 'jfree', name: 'jfreechart', version: '1.0.13'
+    // https://mvnrepository.com/artifact/com.querydsl/querydsl-sql
+    compile group: 'com.querydsl', name: 'querydsl-sql', version: querydsl_version
+    
+    // https://mvnrepository.com/artifact/com.querydsl/querydsl-sql-codegen
+    compile group: 'com.querydsl', name: 'querydsl-sql-codegen', version: querydsl_version
+
+    // used with querydsl
+    // https://mvnrepository.com/artifact/org.slf4j/slf4j-log4j12
+    testCompile group: 'org.slf4j', name: 'slf4j-log4j12', version: log4j12_version
 
     // https://mvnrepository.com/artifact/org.jooq/jooq
-    compile group: 'org.jooq', name: 'jooq', version: '3.10.6'
+    // compile group: 'org.jooq', name: 'jooq', version: jooq_version
+
+    // https://mvnrepository.com/artifact/jfree/jfreechart
+    compile group: 'jfree', name: 'jfreechart', version: jfree_version
+
 }
 
 // In this section you declare where to find the dependencies of your project
