@@ -13,12 +13,17 @@ plugins {
     // Apply the application plugin to add support for building an application
     id 'application'
 
+    id 'distribution'
+
     // kotlin plugin
     id "org.jetbrains.kotlin.jvm" version "1.2.31"
 }
 
 // Define the main class for the application
-mainClassName = 'TheOffice'
+mainClassName = 'TheOfficeKt'
+
+// multiple main's
+ext.multiMain = false
 
 // dependency versions
 ext {
@@ -65,4 +70,33 @@ repositories {
     // You can declare any Maven/Ivy/file repository here.
     jcenter()
     mavenCentral()
+}
+
+if (ext.multiMain) {
+    //=======================================
+    // Create scripts for entry points
+    // Subproject must apply application plugin to be able to call this method.
+         
+    task createAllStartScripts() {
+        //doLast {
+            // placeholder
+        //}
+    }
+    
+    def scripts = [ 
+        "TheOfficeKt" : "TheOfficeKt",
+    ]
+    scripts.each() { scriptName, className ->
+            def t = tasks.create(name: scriptName+'StartScript', type: CreateStartScripts) {
+            mainClassName = className
+            applicationName = scriptName
+            outputDir = new File(project.buildDir, 'scripts')
+            classpath = jar.outputs.files + project.configurations.runtime
+        }
+          applicationDistribution.into("bin") {
+                from(t)
+                fileMode = 0755
+        }
+        createAllStartScripts.dependsOn(t)
+    }
 }
