@@ -16,7 +16,7 @@ plugins {
     id 'distribution'
 
     // kotlin plugin
-    id "org.jetbrains.kotlin.jvm" version "1.2.31"
+    id "org.jetbrains.kotlin.jvm" version "1.2.41"
 }
 
 // Define the main class for the application
@@ -29,40 +29,45 @@ group 'com.github.zengineering'
 
 // dependency versions
 ext {
+    kotlin_version = '1.2.41'
+    sqlite_jdbc_version = '3.21.0.1'
+    exposed_version = '0.10.2'
     kotlin_argparser_version = '2.0.6'
-    querydsl_version = '4.2.1'
-    log4j12_version = '1.7.25'
-    jooq_version = '3.10.6'
-    jfree_version='1.0.13'
+    log4j_version = '1.7.25'
+    //querydsl_version = '4.2.1'
+    //log4j12_version = '1.7.25'
+    //jooq_version = '3.10.6'
+    //jfree_version='1.0.13'
 }
 
 dependencies {
     // This dependency is found on compile classpath of this component and consumers.
-    compile 'com.google.guava:guava:23.0'
+    //compile 'com.google.guava:guava:23.0'
 
     // Use JUnit test framework
     testCompile 'junit:junit:4.12'
 
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    compile group: 'org.jetbrains.kotlin', name: 'kotlin-stdlib-jdk8', version: kotlin_version
+
+    // sqlite i/o
+    compile group: 'org.xerial', name: 'sqlite-jdbc', version: sqlite_jdbc_version
+    compile group: 'org.jetbrains.exposed', name: 'exposed', version: exposed_version
+
+    // logging (used by Exposed)
+    compile group: 'org.slf4j', name: 'slf4j-api', version: log4j_version
+    compile group: 'org.slf4j', name: 'slf4j-log4j12', version: log4j_version
 
     // https://github.com/xenomachina/kotlin-argparser
     compile group: 'com.xenomachina', name: 'kotlin-argparser', version: kotlin_argparser_version
 
-    // https://mvnrepository.com/artifact/com.querydsl/querydsl-sql
-    compile group: 'com.querydsl', name: 'querydsl-sql', version: querydsl_version
-    
-    // https://mvnrepository.com/artifact/com.querydsl/querydsl-sql-codegen
-    compile group: 'com.querydsl', name: 'querydsl-sql-codegen', version: querydsl_version
+    //compile group: 'jfree', name: 'jfreechart', version: jfree_version
 
-    // used with querydsl
-    // https://mvnrepository.com/artifact/org.slf4j/slf4j-log4j12
-    testCompile group: 'org.slf4j', name: 'slf4j-log4j12', version: log4j12_version
+    //compile group: 'com.querydsl', name: 'querydsl-sql', version: querydsl_version
+    //compile group: 'com.querydsl', name: 'querydsl-sql-codegen', version: querydsl_version
+    //testCompile group: 'org.slf4j', name: 'slf4j-log4j12', version: log4j12_version
 
-    // https://mvnrepository.com/artifact/org.jooq/jooq
     // compile group: 'org.jooq', name: 'jooq', version: jooq_version
 
-    // https://mvnrepository.com/artifact/jfree/jfreechart
-    compile group: 'jfree', name: 'jfreechart', version: jfree_version
 
 }
 
@@ -72,6 +77,9 @@ repositories {
     // You can declare any Maven/Ivy/file repository here.
     jcenter()
     mavenCentral()
+    maven {
+        url  "https://dl.bintray.com/kotlin/exposed"
+    }
 }
 
 if (ext.multipleStartScripts) {
@@ -100,5 +108,11 @@ if (ext.multipleStartScripts) {
                 fileMode = 0755
         }
         createAllStartScripts.dependsOn(t)
+    }
+}
+
+run {
+    if (System.getProperty("exec.args")) {
+        args System.getProperty("exec.args").split()
     }
 }
