@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, Boolean
+from sqlalchemy import create_engine, Column, Integer, Text, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from os.path import realpath
@@ -14,8 +14,8 @@ class OfficeQuote(Base):
     season = Column(Integer)
     episode = Column(Integer)
     scene = Column(Integer)
-    speaker = Column(String)
-    line = Column(String)
+    speaker = Column(Text)
+    line = Column(Text)
     deleted = Column(Boolean)
 
     def __repr__(self):
