@@ -34,16 +34,9 @@ ext {
     exposed_version = '0.10.2'
     kotlin_argparser_version = '2.0.6'
     log4j_version = '1.7.25'
-    //querydsl_version = '4.2.1'
-    //log4j12_version = '1.7.25'
-    //jooq_version = '3.10.6'
-    //jfree_version='1.0.13'
 }
 
 dependencies {
-    // This dependency is found on compile classpath of this component and consumers.
-    //compile 'com.google.guava:guava:23.0'
-
     // Use JUnit test framework
     testCompile 'junit:junit:4.12'
 
@@ -61,20 +54,10 @@ dependencies {
     compile group: 'com.xenomachina', name: 'kotlin-argparser', version: kotlin_argparser_version
 
     //compile group: 'jfree', name: 'jfreechart', version: jfree_version
-
-    //compile group: 'com.querydsl', name: 'querydsl-sql', version: querydsl_version
-    //compile group: 'com.querydsl', name: 'querydsl-sql-codegen', version: querydsl_version
-    //testCompile group: 'org.slf4j', name: 'slf4j-log4j12', version: log4j12_version
-
-    // compile group: 'org.jooq', name: 'jooq', version: jooq_version
-
-
 }
 
-// In this section you declare where to find the dependencies of your project
+// dependencies of the project
 repositories {
-    // Use jcenter for resolving your dependencies.
-    // You can declare any Maven/Ivy/file repository here.
     jcenter()
     mavenCentral()
     maven {
@@ -83,10 +66,8 @@ repositories {
 }
 
 if (ext.multipleStartScripts) {
-    //=======================================
     // Create scripts for entry points
     // Subproject must apply application plugin to be able to call this method.
-         
     task createAllStartScripts() {
         //doLast {
             // placeholder
