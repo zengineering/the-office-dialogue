@@ -48,7 +48,7 @@ def writeToDatabase(db, queue, eps_count):
             print("writeToDatabase failed with:\n{}".format(e), file=stderr)
         finally:
             eps_count -= 1
-            print("{} episodes left".format(eps_count), end="\r")
+            print("{} episodes remaining".format(eps_count), end="\r")
 
     return successful
 
@@ -82,15 +82,28 @@ def episodeFactory(eps_url, eps_url_pattern, index_url):
         print("Episode from url {} failed:\n\t{}".format(eps_url, e), file=stderr)
 
 
-def fetchAndParser(url_q, episode_q, failed_q, eps_href_re, index_url):
+def fetchAndParse(url_q, episode_q, failed_q, eps_href_re, index_url):
+    '''
+    Pop a url from the url queue
+    Download and parse the episode page at that url
+    Push the parsed result into the episode queue
+    '''
     while not url_q.empty():
         eps_url = url_q.get()
-        print(eps_url)
         episode = episodeFactory(eps_url, eps_href_re, index_url)
         episode_q.put(episode)
         if episode is None:
             failed_q.put(eps_url)
 
+
+def downloadProgress(url_q):
+    '''
+    Show the progress of episode downloads
+    '''
+    total_episodes = url_q.qsize()
+    while not url_q.empty():
+        print("Downloaded {} episodes successfully; {} episodes remaining".format(
+            total_episodes - url_q.qsize(), total_episodes), end="\r")
 
 
 def main():
@@ -108,16 +121,21 @@ def main():
     failed_q = Queue()
     database = Database(db_file)
 
+    # queue up all episodes
     for url in eps_urls:
         url_q.put(url)
+
+    # thread to show download progress
+    progress_thread = Thread(target=downloadProgress, args=(url_q,), name="progress")
 
     # consumer thread for writing each episode it receives in a queue to the database
     db_thread = Thread(target=lambda: writeToDatabase(database, episode_q, url_q.qsize()), name="database")
 
     # producer threads for fetching and parsing episode pages
-    thread_pool = [Thread(target=fetchAndParser, args=(url_q, episode_q, failed_q, eps_href_re, index_url)) for _ in range(num_threads)]
+    thread_pool = [Thread(target=fetchAndParse, args=(url_q, episode_q, failed_q, eps_href_re, index_url)) for _ in range(num_threads)]
 
     # start the threads
+    progress_thread.start()
     db_thread.start()
     for t in thread_pool:
         t.start()
@@ -126,6 +144,7 @@ def main():
     for t in thread_pool:
         t.join()
     db_thread.join()
+    progress_thread.join()
 
     if not failed_q.empty():
         print("The following pages failed to download:")
