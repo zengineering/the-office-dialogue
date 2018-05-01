@@ -103,13 +103,13 @@ def downloadProgress(url_q):
     total_episodes = url_q.qsize()
     while not url_q.empty():
         print("Downloaded {} episodes successfully; {} episodes remaining".format(
-            total_episodes - url_q.qsize(), total_episodes), end="\r")
+            total_episodes - url_q.qsize(), url_q.qsize()), end="\r")
 
 
 def main():
     num_threads = 32
     index_url = "http://www.officequotes.net/index.php"
-    db_file = "office-quotes.sqlite"
+    db_file = "the-office-quotes.sqlite"
     eps_href_re = re.compile("no(\d)-(\d+).php")
 
     # get the index page and all episode urls
