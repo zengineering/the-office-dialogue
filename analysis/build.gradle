@@ -20,7 +20,8 @@ plugins {
 }
 
 // Define the main class for the application
-mainClassName = 'com.github.zengineering.TheOfficeKt'
+//mainClassName = 'com.github.zengineering.TheOfficeKt'
+mainClassName = 'com.github.zengineering.DatabaseNameCorrectionsKt'
 
 // start scripts for each main
 ext.multipleStartScripts = true
@@ -98,3 +99,11 @@ run {
         args System.getProperty("exec.args").split()
     }
 }
+
+//sourceSets {
+//    main {
+//        resources {
+//            srcDirs "src/main/resources"
+//        }
+//    }
+//}

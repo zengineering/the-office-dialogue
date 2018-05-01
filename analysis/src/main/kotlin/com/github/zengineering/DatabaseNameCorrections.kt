@@ -7,6 +7,10 @@ import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.transactions.ThreadLocalTransactionManager
 
+private val topLevelClass = object: Any() {}.javaClass
+
+val nameCorrectionsCsv = "/TheOffice/name_corrections.csv"
+
 //object OfficeQuotes: IntIdTable("office_quotes") {
 object OfficeQuotes: Table("office_quotes") {
     val id: Column<Int> = integer("id").autoIncrement().primaryKey()
@@ -44,22 +48,19 @@ fun initDbConnection(dbPath: String) {
     )
 }
 
-fun readNameCorrections(csv: String): List<Correction> {
+fun loadNameCorrections(): List<Correction> {
     val corrections = mutableListOf<Correction>()
-    checkFile(csv)?.let { validCsv -> 
-            File(validCsv).forEachLine { line ->
-            line.whenNotNullNorBlank { validLine ->
-                line.split(",").let { items ->
-                    if (items.size == 2) {
-                        corrections.add(Correction(items.first(), items.last()))
-                    } else {
-                        System.err.println("Invalid line in csv: $validLine")
-                    }
+    topLevelClass.getResourceAsStream(nameCorrectionsCsv).bufferedReader().lineSequence().forEach { line ->
+        line.whenNotNullNorBlank { validLine ->
+            line.split(",").let { items ->
+                if (items.size == 2) {
+                    corrections.add(Correction(items.first(), items.last()))
+                } else {
+                    System.err.println("Invalid line in csv: $validLine")
                 }
             }
         }
     }
-    ?: System.err.println("Invalid corrections file: $csv")
     return corrections.toList()
 }
 
@@ -87,7 +88,9 @@ fun main(args: Array<String>) {
         if (args.contains("-h") or args.contains("--help")) {
             help()
         } else { 
-            val corrections = readNameCorrections(args[1])
+            println(topLevelClass.name)
+            println(topLevelClass.enclosingClass.name)
+            val corrections = loadNameCorrections()
             applyNameCorrections(args[0], corrections)
         }
     } else {
