@@ -23,7 +23,7 @@ plugins {
 mainClassName = 'com.github.zengineering.TheOfficeKt'
 
 // start scripts for each main
-ext.multipleStartScripts = false
+ext.multipleStartScripts = true
 
 group 'com.github.zengineering'
 
@@ -76,6 +76,7 @@ if (ext.multipleStartScripts) {
     
     def scripts = [ 
         "TheOfficeKt" : "com.github.zengineering.TheOfficeKt",
+        "DatabaseNameCorrectionsKt" : "com.github.zengineering.DatabaseNameCorrectionsKt",
     ]
     scripts.each() { scriptName, className ->
             def t = tasks.create(name: scriptName+'StartScript', type: CreateStartScripts) {
