@@ -88,8 +88,6 @@ fun main(args: Array<String>) {
         if (args.contains("-h") or args.contains("--help")) {
             help()
         } else { 
-            println(topLevelClass.name)
-            println(topLevelClass.enclosingClass.name)
             val corrections = loadNameCorrections()
             applyNameCorrections(args[0], corrections)
         }
