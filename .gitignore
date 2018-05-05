@@ -7,3 +7,6 @@ build
 .gradle
 .m2
 !gradle-wrapper.jar
+
+*.swp
+*.swo
