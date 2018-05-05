@@ -48,7 +48,7 @@ def writeToDatabase(db, queue, eps_count):
             print("writeToDatabase failed with:\n{}".format(e), file=stderr)
         finally:
             eps_count -= 1
-            print("{} episodes remaining".format(eps_count), end="\r")
+            print("{} episodes remaining".format(eps_count), end=" "*4 + "\r")
 
     return successful
 
