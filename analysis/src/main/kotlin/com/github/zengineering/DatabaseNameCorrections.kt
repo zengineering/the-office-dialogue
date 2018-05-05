@@ -1,52 +1,13 @@
 package com.github.zengineering
 
-import java.io.File
-import java.sql.DriverManager
-import java.sql.Connection.TRANSACTION_SERIALIZABLE
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
-import org.jetbrains.exposed.sql.transactions.ThreadLocalTransactionManager
 
 private val topLevelClass = object: Any() {}.javaClass
 
 val nameCorrectionsCsv = "/TheOffice/name_corrections.csv"
 
-//object OfficeQuotes: IntIdTable("office_quotes") {
-object OfficeQuotes: Table("office_quotes") {
-    val id: Column<Int> = integer("id").autoIncrement().primaryKey()
-    val season: Column<Int> = integer("season")
-    val episode: Column<Int> = integer("episode")
-    val scene: Column<Int> = integer("episode")
-    val speaker: Column<String> = text("speaker")
-    val line: Column<String> = text("line")
-    val deleted: Column <Boolean> = bool("deleted")
-}
-
 data class Correction(val from: String, val to: String)
-
-fun <R> String?.whenNotNullNorBlank(block: (String) -> R): R? {
-    return this?.let { receiver ->
-        if (receiver.isNotBlank()) {
-            block(receiver)
-        } else null
-    }
-}
-
-fun checkFile(path: String): String? {
-    val absolutePath = File(path).getAbsoluteFile()
-    return if (absolutePath.exists()) {
-        absolutePath.path
-    } else {
-        null
-    }
-}
-
-fun initDbConnection(dbPath: String) {
-    Database.connect(
-        { DriverManager.getConnection("jdbc:sqlite:$dbPath") }, 
-        { ThreadLocalTransactionManager(it, TRANSACTION_SERIALIZABLE) }
-    )
-}
 
 fun loadNameCorrections(): List<Correction> {
     val corrections = mutableListOf<Correction>()
@@ -81,7 +42,7 @@ fun applyNameCorrections(dbPath: String, corrections: List<Correction>) {
 }
 
 // Argparser
-fun help(): Unit = println("usage: ./TheOfficeKt <db_path>\n")
+fun help(): Unit = println("usage: ./DatabaseNameCorrectionsKt <db_path>\n")
 
 fun main(args: Array<String>) {
     if (args.isNotEmpty()) {
