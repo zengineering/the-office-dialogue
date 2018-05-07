@@ -77,7 +77,8 @@ if (ext.multipleStartScripts) {
     
     def scripts = [ 
         "TheOfficeKt" : "com.github.zengineering.TheOfficeKt",
-        "DatabaseNameCorrectionsKt" : "com.github.zengineering.DatabaseNameCorrectionsKt",
+        "correctNamesinDb" : "com.github.zengineering.DatabaseNameCorrectionsKt",
+        "countLinesPerCharacter" : "com.github.zengineering.CharacterLineCountsKt",
     ]
     scripts.each() { scriptName, className ->
             def t = tasks.create(name: scriptName+'StartScript', type: CreateStartScripts) {

@@ -25,36 +25,27 @@ fun loadNameCorrections(): List<Correction> {
     return corrections.toList()
 }
 
-fun applyNameCorrections(dbPath: String, corrections: List<Correction>) {
-    checkFile(dbPath)?.let { validDbPath ->
-        initDbConnection(validDbPath)
-
-        transaction {
-            corrections.forEach { (from, to) ->
-                println("${from} -> ${to}")
-                OfficeQuotes.update ({ OfficeQuotes.speaker eq from }) { entry ->
-                    entry[OfficeQuotes.speaker] = to
-                }
+fun applyNameCorrections(corrections: List<Correction>) {
+    transaction {
+        corrections.forEach { (from, to) ->
+            println("${from} -> ${to}")
+            OfficeQuotes.update ({ OfficeQuotes.speaker eq from }) { entry ->
+                entry[OfficeQuotes.speaker] = to
             }
         }
     }
-    ?: System.err.println("Invalid database path: $dbPath")
 }
 
-// Argparser
-fun help(): Unit = println("usage: ./DatabaseNameCorrectionsKt <db_path>\n")
+fun correctNamesInDb(dbPath: String) {
+    connectDatabase(dbPath)
+    applyNameCorrections(loadNameCorrections())
+}
 
 fun main(args: Array<String>) {
-    if (args.isNotEmpty()) {
-        if (args.contains("-h") or args.contains("--help")) {
-            help()
-        } else { 
-            val corrections = loadNameCorrections()
-            applyNameCorrections(args[0], corrections)
-        }
-    } else {
-        help()
+    if (args.isEmpty() or args.contains("-h") or args.contains("--help")) {
+        println("usage: ./correctNamesInDb <db_path>\n")
+    } else { 
+        correctNamesInDb(args[0])
     }
 }
-
 

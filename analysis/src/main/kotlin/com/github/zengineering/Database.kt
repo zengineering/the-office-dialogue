@@ -16,10 +16,13 @@ object OfficeQuotes: Table("office_quotes") {
 }
 
 
-fun initDbConnection(dbPath: String) {
-    Database.connect(
-        { DriverManager.getConnection("jdbc:sqlite:$dbPath") }, 
-        { ThreadLocalTransactionManager(it, TRANSACTION_SERIALIZABLE) }
-    )
+fun connectDatabase(dbPath: String) {
+    checkFile(dbPath)?.let { validDbPath ->
+        Database.connect(
+            { DriverManager.getConnection("jdbc:sqlite:$validDbPath") }, 
+            { ThreadLocalTransactionManager(it, TRANSACTION_SERIALIZABLE) }
+        )
+    }
+    ?: System.err.println("Invalid database path: $dbPath")
 }
 

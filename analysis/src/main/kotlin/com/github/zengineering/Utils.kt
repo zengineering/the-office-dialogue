@@ -2,10 +2,18 @@ package com.github.zengineering
 
 import java.io.File
 
-fun <R> String?.whenNotNullNorBlank(block: (String) -> R): R? {
+fun <R> String?.whenNotNullNorBlank(action: (String) -> R): R? {
     return this?.let { receiver ->
         if (receiver.isNotBlank()) {
-            block(receiver)
+            action(receiver)
+        } else null
+    }
+}
+
+fun <R: Any, E: Any, T:Collection<E>> T?.whenNotNullNorEmpty(action: (T) -> R): R? {
+    return this?.let { receiver ->
+        if (receiver.isNotEmpty()) {
+            action(receiver)
         } else null
     }
 }
@@ -14,8 +22,6 @@ fun checkFile(path: String): String? {
     val absolutePath = File(path).getAbsoluteFile()
     return if (absolutePath.exists()) {
         absolutePath.path
-    } else {
-        null
-    }
+    } else null
 }
 
