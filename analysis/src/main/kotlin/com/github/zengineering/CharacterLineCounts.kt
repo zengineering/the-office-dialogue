@@ -10,15 +10,11 @@ fun countLinesPerCharacter(dbPath: String) {
             OfficeQuotes
                 .slice(OfficeQuotes.speaker)
                 .select { OfficeQuotes.season eq season }
-                .map { it[OfficeQuotes.speaker] }
-                .groupingBy { it }
+                .groupingBy { it[OfficeQuotes.speaker] }
                 .eachCount()
                 .toList()
                 .sortedByDescending { (_, count) -> count }
-                .forEach {
-                    println(it)
-                }
-        } 
+        }
     }
 }
 
