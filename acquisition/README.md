@@ -1,4 +1,4 @@
-## Tools to scrape http://officequotes.net/ and download all dialogue.
+## Tools to scrape http://officequotes.net/, download all dialogue, and stash it in a database.
 
 ### Usage
 ```bash
