@@ -2,20 +2,25 @@ package com.github.zengineering
 
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
+import java.io.File
+import com.google.gson.Gson
 
 fun countLinesPerCharacter(dbPath: String) {
+    var characterLineCounts = mapOf<Int, Map<String, Int>>()
     connectDatabase(dbPath)
     transaction {
-        (1..9).forEach { season ->
-            OfficeQuotes
+        characterLineCounts = (1..9).associateBy(
+            { it },
+            { season -> OfficeQuotes
                 .slice(OfficeQuotes.speaker)
                 .select { OfficeQuotes.season eq season }
                 .groupingBy { it[OfficeQuotes.speaker] }
                 .eachCount()
-                .toList()
-                .sortedByDescending { (_, count) -> count }
-        }
+            }
+        )
     }
+    Gson().run { File("characterLineCount.json").writeText(this.toJson(characterLineCounts)) }
+
 }
 
 
