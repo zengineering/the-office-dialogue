@@ -2,7 +2,7 @@ package com.github.zengineering
 
 import java.io.File
 
-fun <R> String?.whenNotNullNorBlank(action: (String) -> R): R? {
+inline fun <R> String?.whenNotNullNorBlank(action: (String) -> R): R? {
     return this?.let { receiver ->
         if (receiver.isNotBlank()) {
             action(receiver)
@@ -10,7 +10,7 @@ fun <R> String?.whenNotNullNorBlank(action: (String) -> R): R? {
     }
 }
 
-fun <R: Any, E: Any, T:Collection<E>> T?.whenNotNullNorEmpty(action: (T) -> R): R? {
+inline fun <R: Any, E: Any, T:Collection<E>> T?.whenNotNullNorEmpty(action: (T) -> R): R? {
     return this?.let { receiver ->
         if (receiver.isNotEmpty()) {
             action(receiver)
