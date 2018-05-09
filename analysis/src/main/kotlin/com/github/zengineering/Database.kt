@@ -15,7 +15,6 @@ object OfficeQuotes: Table("office_quotes") {
     val deleted: Column <Boolean> = bool("deleted")
 }
 
-
 fun connectDatabase(dbPath: String) {
     checkFile(dbPath)?.let { validDbPath ->
         Database.connect(

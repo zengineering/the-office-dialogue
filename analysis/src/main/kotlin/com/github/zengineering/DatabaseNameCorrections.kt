@@ -11,13 +11,15 @@ data class Correction(val from: String, val to: String)
 
 fun loadNameCorrections(): List<Correction> {
     val corrections = mutableListOf<Correction>()
-    topLevelClass.getResourceAsStream(nameCorrectionsCsv).bufferedReader().lineSequence().forEach { line ->
-        line.whenNotNullNorBlank { validLine ->
-            line.split(",").let { items ->
-                if (items.size == 2) {
-                    corrections.add(Correction(items.first(), items.last()))
-                } else {
-                    System.err.println("Invalid line in csv: $validLine")
+    topLevelClass.getResourceAsStream(nameCorrectionsCsv).use { stream ->
+        stream.bufferedReader().lineSequence().forEach { line ->
+            line.whenNotNullNorBlank { validLine ->
+                line.split(",").let { items ->
+                    if (items.size == 2) {
+                        corrections.add(Correction(items.first(), items.last()))
+                    } else {
+                        System.err.println("Invalid line in csv: $validLine")
+                    }
                 }
             }
         }
