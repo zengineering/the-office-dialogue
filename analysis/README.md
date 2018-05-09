@@ -11,7 +11,7 @@ Database interactions using [Exposed](https://github.com/JetBrains/Exposed)
     + [ ] Lines
 
 
-#### Analyses
+#### Character Dialogue Analyses
 Scope       | Lines              | Words
 ----------- | -----              | -----
 Per season  | :white_check_mark: |      
