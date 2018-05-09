@@ -6,13 +6,13 @@ Database interactions using [Exposed](https://github.com/JetBrains/Exposed)
 
 
 #### Corrections
-- [] Correct dialogue source errors
-    [] Names (*in progress*)
-    [] Lines
+- [ ] Correct dialogue source errors
+    + [ ] Names (*in progress*)
+    + [ ] Lines
 
 
 #### Analyses
-            | Lines              | Words
+Scope       | Lines              | Words
 ----------- | -----              | -----
 Per season  | :white_check_mark: |      
 Per episode |                    |      
