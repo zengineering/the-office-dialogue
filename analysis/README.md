@@ -2,7 +2,7 @@
 
 Kotlin apps for dialogue analysis.
 
-Database interactions using [Exposed](https://github.com/JetBrains/Exposed)
+Database interactions using [Exposed](https://github.com/JetBrains/Exposed).
 
 
 #### Corrections
