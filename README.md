@@ -1,4 +1,7 @@
 # Dialogue from The Office
 
-- Current data source: A google spreadsheet posted on HackerNews with a bunch of bad/misinterpreted characters (curly quotes, ellipses, etc) that was hastily corrected
-- TODO source: http://www.officequotes.net/index.php
+[The Office](https://www.imdb.com/title/tt0386676/) is a fantastic show. This project aims to do some light analysis on the dialogue of that show.
+
+- Data source is [here](http://officequotes.net/).
+- *acqusition/* contains tools to scrape the source website, download all dialogue and store it in a SQLite database.
+- *analysis/* contains tools for performing various types of analysis and export the results to JSON.
