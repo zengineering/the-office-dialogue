@@ -6,7 +6,7 @@ import java.io.File
 import com.google.gson.Gson
 
 fun countLinesPerCharacter(dbPath: String) {
-    var characterLineCounts = mapOf<Int, List<Pair<String, Int>>>()
+    var characterLineCounts = mapOf<Int, Map<String, Int>>()
     connectDatabase(dbPath)
     transaction {
         characterLineCounts = (1..9).associateBy(
@@ -16,8 +16,6 @@ fun countLinesPerCharacter(dbPath: String) {
                 .select { OfficeQuotes.season eq season }
                 .groupingBy { it[OfficeQuotes.speaker] }
                 .eachCount()
-                .toList()
-                .sortedByDescending { (_, count) -> count }
             }
         )
     }
