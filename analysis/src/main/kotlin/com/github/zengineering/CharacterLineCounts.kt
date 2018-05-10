@@ -11,9 +11,9 @@ fun countLinesPerCharacter(dbPath: String) {
     transaction {
         characterLineCounts = (1..9).associateBy(
             { it },
-            { OfficeQuotes
+            { season -> OfficeQuotes
                 .slice(OfficeQuotes.speaker, OfficeQuotes.speaker.count())
-                .selectAll()
+                .select { OfficeQuotes.season eq season }
                 .groupBy(OfficeQuotes.speaker)
                 .associateBy(
                     { it[OfficeQuotes.speaker] },
