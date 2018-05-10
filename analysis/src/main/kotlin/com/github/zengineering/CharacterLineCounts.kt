@@ -11,16 +11,18 @@ fun countLinesPerCharacter(dbPath: String) {
     transaction {
         characterLineCounts = (1..9).associateBy(
             { it },
-            { season -> OfficeQuotes
-                .slice(OfficeQuotes.speaker)
-                .select { OfficeQuotes.season eq season }
-                .groupingBy { it[OfficeQuotes.speaker] }
-                .eachCount()
+            { OfficeQuotes
+                .slice(OfficeQuotes.speaker, OfficeQuotes.speaker.count())
+                .selectAll()
+                .groupBy(OfficeQuotes.speaker)
+                .associateBy(
+                    { it[OfficeQuotes.speaker] },
+                    { it[OfficeQuotes.speaker.count()] }
+                )
             }
         )
     }
     Gson().run { File("characterLineCount.json").writeText(this.toJson(characterLineCounts)) }
-
 }
 
 
