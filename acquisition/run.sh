@@ -1,2 +1,2 @@
 #!/usr/bin/env sh
-python3 download.py
+python3 download.py $@
