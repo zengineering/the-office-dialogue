@@ -52,10 +52,16 @@ class Database():
             session.close()
 
     def addQuote(self, quote):
+        """
+        Add quote to database
+        """
         with self.session_scope() as session:
             session.add(quote) # dialogLine instance
 
     def addQuotes(self, quotes):
+        """
+        Add multiple quotes to database
+        """
         with self.session_scope() as session:
             for quote in quotes:
                 session.add(quote) # dialogLine instance
