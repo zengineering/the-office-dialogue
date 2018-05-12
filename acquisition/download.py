@@ -6,12 +6,17 @@ from urllib.parse import urljoin
 from queue import Queue
 from threading import Thread
 from sys import stderr
+from argparse import ArgumentParser
 from database import Database, OfficeQuote
 from containers import Episode
 from parse import extractMatchingUrls, parseEpisodePage
-#from HTMLParser import HTMLParseError
 
-req_headers = {"User-Agent": "Mozilla/5.0 (X11; CrOS x86_64 10032.86.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.140 Safari/537.36"}
+
+req_headers = {"User-Agent":
+    ("Mozilla/5.0 (X11; CrOS x86_64 10032.86.0) "
+     "AppleWebKit/537.36 (KHTML, like Gecko) "
+     "Chrome/63.0.3239.140 Safari/537.36")
+}
 
 
 def episodeToDatabase(episode, db):
@@ -106,10 +111,19 @@ def downloadProgress(url_q):
             total_episodes - url_q.qsize(), url_q.qsize()), end="\r")
 
 
+def parseArgs():
+    ap = ArgumentParser(description="Download and store all dialogue from The Office.")
+    ap.add_argument("-t", "--threads", type=int, default=16, help="Number of downloading threads.")
+    ap.add_argument("-o", "--database", type=str, default="the-office-quotes.sqlite",
+        help="SQLite database to write results to.")
+    return ap.parse_args()
+
+
 def main():
-    num_threads = 32
+    args = parseArgs()
+    num_threads = args.threads
+    db_file = args.database
     index_url = "http://www.officequotes.net/index.php"
-    db_file = "the-office-quotes.sqlite"
     eps_href_re = re.compile("no(\d)-(\d+).php")
 
     # get the index page and all episode urls
@@ -132,7 +146,10 @@ def main():
     db_thread = Thread(target=lambda: writeToDatabase(database, episode_q, url_q.qsize()), name="database")
 
     # producer threads for fetching and parsing episode pages
-    thread_pool = [Thread(target=fetchAndParse, args=(url_q, episode_q, failed_q, eps_href_re, index_url)) for _ in range(num_threads)]
+    thread_pool = [
+        Thread(target=fetchAndParse, args=(url_q, episode_q, failed_q, eps_href_re, index_url))
+        for _ in range(num_threads)
+    ]
 
     # start the threads
     progress_thread.start()
@@ -150,5 +167,6 @@ def main():
         print("The following pages failed to download:")
         while not failed_q.empty():
             print(failed_q.get())
+
 
 main()
