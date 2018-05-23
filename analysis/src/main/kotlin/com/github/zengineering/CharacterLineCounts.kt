@@ -10,9 +10,9 @@ import picocli.CommandLine.Command
 import picocli.CommandLine.Option
 import picocli.CommandLine.Parameters
 
-fun countSeasonalLines(dbPath: String, lineCountThreshold: Int=100) {
-    var seasonalLineCounts = mutableMapOf<String, MutableMap<Int, Int>>()
-    try {
+fun countSeasonalLines(dbPath: String, lineCountThreshold: Int=100): Map<String, Map<Int, Int>>? {
+    return try {
+        var seasonalLineCounts = mutableMapOf<String, MutableMap<Int, Int>>()
         connectDatabase(dbPath)
         transaction {
             (1..9).forEach { season -> OfficeQuotes
@@ -25,11 +25,11 @@ fun countSeasonalLines(dbPath: String, lineCountThreshold: Int=100) {
                  }
             }
         }
-        Gson().run { File("seasonalLineCount.json").writeText(this.toJson(
-            seasonalLineCounts.filter { (_, seasons) -> seasons.values.sum() > lineCountThreshold }
-        )) }
+        seasonalLineCounts.mapValues { (_, counts) -> counts.toMap() }
+            .filter { (_, seasons) -> seasons.values.sum() > lineCountThreshold }
     } catch (e: FileNotFoundException) {
         System.err.println("Database not found at '$dbPath'") 
+        null
     }
 }
 
@@ -46,7 +46,11 @@ class CharacterLineCounts : Runnable {
     @Parameters(index = "0", paramLabel = "DB_PATH", description = arrayOf("Path to SQLite quotes database"))
     var dbPath: String = ""
 
-    override fun run() = countSeasonalLines(dbPath, lineCount)
+    override fun run() { 
+        countSeasonalLines(dbPath, lineCount)?.let { seasonalLineCounts ->
+            Gson().run { File("seasonalLineCount.json").writeText(this.toJson( seasonalLineCounts)) }
+        }
+    }
 }
 
 fun main(args: Array<String>) = CommandLine.run(CharacterLineCounts(), *args)
