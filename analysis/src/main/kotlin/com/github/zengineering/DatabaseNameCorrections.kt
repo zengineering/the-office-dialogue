@@ -2,32 +2,24 @@ package com.github.zengineering
 
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import java.io.FileNotFoundException
 
 private val topLevelClass = object: Any() {}.javaClass
 
-val nameCorrectionsCsv = "/TheOffice/name_corrections.csv"
+val nameCorrectionsCsv = "/TheOffice/name_corrections.json"
 
-data class Correction(val from: String, val to: String)
-
-fun loadNameCorrections(): List<Correction> {
-    val corrections = mutableListOf<Correction>()
-    topLevelClass.getResourceAsStream(nameCorrectionsCsv).use { stream ->
-        stream.bufferedReader().lineSequence().forEach { line ->
-            line.whenNotNullNorBlank { validLine ->
-                line.split(",").let { items ->
-                    if (items.size == 2) {
-                        corrections.add(Correction(items.first(), items.last()))
-                    } else {
-                        System.err.println("Invalid line in csv: $validLine")
-                    }
-                }
-            }
+fun loadNameCorrections(): Map<String, String> {
+    return topLevelClass.getResourceAsStream(nameCorrectionsCsv).use { 
+        it.reader().let { jsonReader -> 
+            Gson().fromJson<Map<String, String>>(jsonReader, 
+                object: TypeToken<Map<String, String>>() {}.type) 
         }
     }
-    return corrections.toList()
 }
 
-fun applyNameCorrections(corrections: List<Correction>) {
+fun applyNameCorrections(corrections: Map<String, String>) {
     transaction {
         corrections.forEach { (from, to) ->
             println("${from} -> ${to}")
@@ -39,8 +31,12 @@ fun applyNameCorrections(corrections: List<Correction>) {
 }
 
 fun correctNamesInDb(dbPath: String) {
-    connectDatabase(dbPath)
-    applyNameCorrections(loadNameCorrections())
+    try {
+        connectDatabase(dbPath)
+        applyNameCorrections(loadNameCorrections())
+    } catch (e: FileNotFoundException) {
+        System.err.println("Database not found at $dbPath") 
+    }
 }
 
 fun main(args: Array<String>) {

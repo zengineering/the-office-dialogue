@@ -1,6 +1,7 @@
 package com.github.zengineering
 
 import java.io.File
+import java.io.FileNotFoundException
 
 inline fun <R> String?.whenNotNullNorBlank(action: (String) -> R): R? {
     return this?.let { receiver ->
@@ -25,3 +26,12 @@ fun checkFile(path: String): String? {
     } else null
 }
 
+@Throws(FileNotFoundException::class)
+fun checkFileError(path: String): String? {
+    val absolutePath = File(path).getAbsoluteFile()
+    return if (!absolutePath.exists()) {
+        throw java.io.FileNotFoundException("Invalid database path: $path")
+    } else {
+        absolutePath.path
+    }
+}

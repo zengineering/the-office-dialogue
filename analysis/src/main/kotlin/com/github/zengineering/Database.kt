@@ -4,6 +4,7 @@ import java.sql.DriverManager
 import java.sql.Connection.TRANSACTION_SERIALIZABLE
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.ThreadLocalTransactionManager
+import java.io.FileNotFoundException
 
 object OfficeQuotes: Table("office_quotes") {
     val id: Column<Int> = integer("id").autoIncrement().primaryKey()
@@ -15,13 +16,13 @@ object OfficeQuotes: Table("office_quotes") {
     val deleted: Column <Boolean> = bool("deleted")
 }
 
+@Throws(FileNotFoundException::class)
 fun connectDatabase(dbPath: String) {
-    checkFile(dbPath)?.let { validDbPath ->
+    checkFileError(dbPath)?.let { validDbPath ->
         Database.connect(
             { DriverManager.getConnection("jdbc:sqlite:$validDbPath") }, 
             { ThreadLocalTransactionManager(it, TRANSACTION_SERIALIZABLE) }
         )
     }
-    ?: System.err.println("Invalid database path: $dbPath")
 }
 
