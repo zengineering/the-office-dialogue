@@ -1,12 +1,16 @@
 package com.github.zengineering
 
+import java.io.File
+import java.io.FileNotFoundException
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
-import java.io.File
 import com.google.gson.Gson
-import java.io.FileNotFoundException
+import picocli.CommandLine
+import picocli.CommandLine.Command
+import picocli.CommandLine.Option
+import picocli.CommandLine.Parameters
 
-fun countSeasonalLines(dbPath: String) {
+fun countSeasonalLines(dbPath: String, lineCountThreshold: Int=100) {
     var seasonalLineCounts = mutableMapOf<String, MutableMap<Int, Int>>()
     try {
         connectDatabase(dbPath)
@@ -22,18 +26,28 @@ fun countSeasonalLines(dbPath: String) {
             }
         }
         Gson().run { File("seasonalLineCount.json").writeText(this.toJson(
-            seasonalLineCounts.filter { (_, seasons) -> seasons.values.sum() > 100 }
+            seasonalLineCounts.filter { (_, seasons) -> seasons.values.sum() > lineCountThreshold }
         )) }
     } catch (e: FileNotFoundException) {
         System.err.println("Database not found at $dbPath") 
     }
 }
 
+@Command(name = "CharacterLineCounts", 
+    mixinStandardHelpOptions = true, 
+    description = arrayOf("Produce JSON { character: { season : line count } } from SQLite db.")
+)
+class CharacterLineCounts : Runnable {
+    @Option(names = arrayOf("-l", "--line-count"), description = arrayOf("Minimum threshold for total line count per character"))
+    var lineCount = 100
 
-fun main(args: Array<String>) {
-    if (args.isEmpty() or args.contains("-h") or args.contains("--help")) {
-        println("usage: ./CharacterLineCountsKt <db_path>\n")
-    } else { 
-        countSeasonalLines(args[0])
+    @Parameters(index = "0", paramLabel = "DB_PATH", description = arrayOf("Path to SQLite quotes database"))
+    var dbPath: String? = null
+
+    override fun run() {
+        println(lineCount)
+        countSeasonalLines(dbPath!!, lineCount)
     }
 }
+
+fun main(args: Array<String>) = CommandLine.run(CharacterLineCounts(), *args)

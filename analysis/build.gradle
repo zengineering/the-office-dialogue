@@ -30,6 +30,7 @@ ext {
     kotlin_argparser_version = '2.0.6'
     log4j_version = '1.7.25'
     gson_version = '2.8.4'
+    picocli_version = '3.0.1'
 }
 
 dependencies {
@@ -49,10 +50,12 @@ dependencies {
     // Google Json
     compile group: 'com.google.code.gson', name: 'gson', version: gson_version
 
+    // commnadline parser
+    compile group: 'info.picocli', name: 'picocli', version: picocli_version
+
     // https://github.com/xenomachina/kotlin-argparser
     //compile group: 'com.xenomachina', name: 'kotlin-argparser', version: kotlin_argparser_version
 
-    //compile group: 'jfree', name: 'jfreechart', version: jfree_version
 }
 
 // dependencies of the project
