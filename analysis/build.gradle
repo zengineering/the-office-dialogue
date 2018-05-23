@@ -52,10 +52,6 @@ dependencies {
 
     // commnadline parser
     compile group: 'info.picocli', name: 'picocli', version: picocli_version
-
-    // https://github.com/xenomachina/kotlin-argparser
-    //compile group: 'com.xenomachina', name: 'kotlin-argparser', version: kotlin_argparser_version
-
 }
 
 // dependencies of the project

@@ -29,25 +29,24 @@ fun countSeasonalLines(dbPath: String, lineCountThreshold: Int=100) {
             seasonalLineCounts.filter { (_, seasons) -> seasons.values.sum() > lineCountThreshold }
         )) }
     } catch (e: FileNotFoundException) {
-        System.err.println("Database not found at $dbPath") 
+        System.err.println("Database not found at '$dbPath'") 
     }
 }
 
-@Command(name = "CharacterLineCounts", 
+@Command(
     mixinStandardHelpOptions = true, 
-    description = arrayOf("Produce JSON { character: { season : line count } } from SQLite db.")
+    name = "CharacterLineCounts", 
+    version = arrayOf("v0.1"),
+    description = arrayOf("Produce JSON of the form {character: { season : line count }} from SQLite db.")
 )
 class CharacterLineCounts : Runnable {
     @Option(names = arrayOf("-l", "--line-count"), description = arrayOf("Minimum threshold for total line count per character"))
     var lineCount = 100
 
     @Parameters(index = "0", paramLabel = "DB_PATH", description = arrayOf("Path to SQLite quotes database"))
-    var dbPath: String? = null
+    var dbPath: String = ""
 
-    override fun run() {
-        println(lineCount)
-        countSeasonalLines(dbPath!!, lineCount)
-    }
+    override fun run() = countSeasonalLines(dbPath, lineCount)
 }
 
 fun main(args: Array<String>) = CommandLine.run(CharacterLineCounts(), *args)
