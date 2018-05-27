@@ -21,8 +21,6 @@ class TheOffice : Runnable {
 
 fun main(args: Array<String>) {
     CommandLine(TheOffice())
-        //.addSubcommand("correctDb", DatabaseCorrections())
-        //.addSubcommand("countCharacterLines", CharacterLineCounts())
         .parseWithHandler(RunLast(), args)
 }
 

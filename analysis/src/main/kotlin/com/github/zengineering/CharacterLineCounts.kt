@@ -48,7 +48,7 @@ class CharacterLineCounts : Runnable {
 
     override fun run() { 
         Gson().let { gson ->
-            File("seasonalLineCount.json").let { file ->
+            File("characterLineCounts.json").let { file ->
                 countSeasonalLines(this.parent.dbPath, lineCount)?.let { file.writeText(gson.toJson(it)) }
             }
         }
