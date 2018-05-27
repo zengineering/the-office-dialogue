@@ -70,7 +70,7 @@ if (ext.multipleStartScripts) {
     
     def scripts = [ 
         "TheOfficeKt" : "com.github.zengineering.TheOfficeKt",
-        "correctNamesinDb" : "com.github.zengineering.DatabaseNameCorrectionsKt",
+        "correctDb" : "com.github.zengineering.DatabaseCorrectionsKt",
         "countLinesPerCharacter" : "com.github.zengineering.CharacterLineCountsKt",
     ]
     scripts.each() { scriptName, className ->
