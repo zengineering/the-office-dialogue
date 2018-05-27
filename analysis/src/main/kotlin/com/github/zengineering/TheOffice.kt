@@ -2,7 +2,7 @@ package com.github.zengineering
 
 import picocli.CommandLine
 import picocli.CommandLine.Parameters
-import picocli.CommandLine.RunAll
+import picocli.CommandLine.RunLast
 import picocli.CommandLine.Command
 
 @Command(
@@ -23,7 +23,7 @@ fun main(args: Array<String>) {
     CommandLine(TheOffice())
         //.addSubcommand("correctDb", DatabaseCorrections())
         //.addSubcommand("countCharacterLines", CharacterLineCounts())
-        .parseWithHandler(RunAll(), args)
+        .parseWithHandler(RunLast(), args)
 }
 
 
