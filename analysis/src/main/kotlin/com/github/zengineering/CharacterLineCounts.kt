@@ -40,15 +40,17 @@ fun countSeasonalLines(dbPath: String, lineCountThreshold: Int=100): Map<String,
     description = arrayOf("Produce JSON of the form {character: { season : line count }} from SQLite db.")
 )
 class CharacterLineCounts : Runnable {
-    @Option(names = arrayOf("-l", "--line-count"), description = arrayOf("Minimum threshold for total line count per character"))
+    @Option(names = arrayOf("-l", "--line-count"), description = arrayOf("Minimum threshold for total line count per character (default=100)"))
     var lineCount = 100
 
     @Parameters(index = "0", paramLabel = "DB_PATH", description = arrayOf("Path to SQLite quotes database"))
     var dbPath: String = ""
 
     override fun run() { 
-        countSeasonalLines(dbPath, lineCount)?.let { seasonalLineCounts ->
-            Gson().run { File("seasonalLineCount.json").writeText(this.toJson( seasonalLineCounts)) }
+        Gson().let { gson ->
+            with(File("seasonalLineCount.json")) {
+                countSeasonalLines(dbPath, lineCount)?.let { writeText(gson.toJson(it)) }
+            }
         }
     }
 }
