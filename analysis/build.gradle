@@ -15,7 +15,7 @@ plugins {
 
 // Define the main class for the application
 //mainClassName = 'com.github.zengineering.TheOfficeKt'
-mainClassName = 'com.github.zengineering.CharacterLineCountsKt'
+mainClassName = 'com.github.zengineering.TheOfficeKt'
 
 // start scripts for each main
 ext.multipleStartScripts = true
@@ -69,9 +69,9 @@ if (ext.multipleStartScripts) {
     task createAllStartScripts() { /* doLast { placeholder } */ }
     
     def scripts = [ 
-        "TheOfficeKt" : "com.github.zengineering.TheOfficeKt",
+        "theOffice" : "com.github.zengineering.TheOfficeKt",
         "correctDb" : "com.github.zengineering.DatabaseCorrectionsKt",
-        "countLinesPerCharacter" : "com.github.zengineering.CharacterLineCountsKt",
+        "countCharacterLines" : "com.github.zengineering.CharacterLineCountsKt",
     ]
     scripts.each() { scriptName, className ->
             def t = tasks.create(name: scriptName+'StartScript', type: CreateStartScripts) {

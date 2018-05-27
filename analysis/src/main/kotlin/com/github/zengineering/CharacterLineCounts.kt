@@ -4,8 +4,8 @@ import java.io.File
 import java.io.FileNotFoundException
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
-import com.google.gson.Gson
-import picocli.CommandLine
+import com.google.gson.Gson import picocli.CommandLine
+import picocli.CommandLine.ParentCommand
 import picocli.CommandLine.Command
 import picocli.CommandLine.Option
 import picocli.CommandLine.Parameters
@@ -35,21 +35,21 @@ fun countSeasonalLines(dbPath: String, lineCountThreshold: Int=100): Map<String,
 
 @Command(
     mixinStandardHelpOptions = true, 
-    name = "CharacterLineCounts", 
+    name = "countCharacterLines", 
     version = arrayOf("v0.1"),
     description = arrayOf("Produce JSON of the form {character: { season : line count }} from SQLite db.")
 )
 class CharacterLineCounts : Runnable {
+    @ParentCommand
+    lateinit var parent: TheOffice
+
     @Option(names = arrayOf("-l", "--line-count"), description = arrayOf("Minimum threshold for total line count per character (default=100)"))
     var lineCount = 100
 
-    @Parameters(index = "0", paramLabel = "DB_PATH", description = arrayOf("Path to SQLite quotes database"))
-    var dbPath: String = ""
-
     override fun run() { 
         Gson().let { gson ->
-            with(File("seasonalLineCount.json")) {
-                countSeasonalLines(dbPath, lineCount)?.let { writeText(gson.toJson(it)) }
+            File("seasonalLineCount.json").let { file ->
+                countSeasonalLines(this.parent.dbPath, lineCount)?.let { file.writeText(gson.toJson(it)) }
             }
         }
     }

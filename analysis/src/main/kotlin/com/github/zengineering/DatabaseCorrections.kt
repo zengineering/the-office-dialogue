@@ -5,6 +5,10 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.io.FileNotFoundException
+import picocli.CommandLine
+import picocli.CommandLine.ParentCommand
+import picocli.CommandLine.Command
+import picocli.CommandLine.Parameters
 
 private val topLevelClass = object: Any() {}.javaClass
 
@@ -30,20 +34,25 @@ fun applyNameCorrections(corrections: Map<String, String>) {
     }
 }
 
-fun correctNamesInDb(dbPath: String) {
-    try {
-        connectDatabase(dbPath)
-        applyNameCorrections(loadNameCorrections())
-    } catch (e: FileNotFoundException) {
-        System.err.println("Database not found at $dbPath") 
+@Command(
+    mixinStandardHelpOptions = true, 
+    name = "correctDb", 
+    version = arrayOf("v0.1"),
+    description = arrayOf("Make corrections to The Office dialogue in SQLite db.")
+)
+class DatabaseCorrections : Runnable {
+    @ParentCommand
+    lateinit var parent: TheOffice
+
+    override fun run() { 
+        try {
+            connectDatabase(parent.dbPath)
+            applyNameCorrections(loadNameCorrections())
+        } catch (e: FileNotFoundException) {
+            System.err.println("Database not found at ${parent.dbPath}") 
+        }
     }
 }
 
-fun main(args: Array<String>) {
-    if (args.isEmpty() or args.contains("-h") or args.contains("--help")) {
-        println("usage: ./correctNamesInDb <db_path>\n")
-    } else { 
-        correctNamesInDb(args[0])
-    }
-}
+fun main(args: Array<String>) = CommandLine.run(DatabaseCorrections(), *args)
 
