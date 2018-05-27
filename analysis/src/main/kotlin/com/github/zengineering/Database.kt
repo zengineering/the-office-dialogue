@@ -18,7 +18,7 @@ object OfficeQuotes: Table("office_quotes") {
 
 @Throws(FileNotFoundException::class)
 fun connectDatabase(dbPath: String) {
-    checkFileError(dbPath)?.let { validDbPath ->
+    getAbsFilePathError(dbPath)?.let { validDbPath ->
         Database.connect(
             { DriverManager.getConnection("jdbc:sqlite:$validDbPath") }, 
             { ThreadLocalTransactionManager(it, TRANSACTION_SERIALIZABLE) }

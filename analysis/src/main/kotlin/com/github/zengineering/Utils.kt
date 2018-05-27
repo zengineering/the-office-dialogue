@@ -19,7 +19,7 @@ inline fun <R: Any, E: Any, T:Collection<E>> T?.whenNotNullNorEmpty(action: (T) 
     }
 }
 
-fun checkFile(path: String): String? {
+fun getAbsFilePath(path: String): String? {
     val absolutePath = File(path).getAbsoluteFile()
     return if (absolutePath.exists()) {
         absolutePath.path
@@ -27,7 +27,7 @@ fun checkFile(path: String): String? {
 }
 
 @Throws(FileNotFoundException::class)
-fun checkFileError(path: String): String? {
+fun getAbsFilePathError(path: String): String? {
     val absolutePath = File(path).getAbsoluteFile()
     return if (!absolutePath.exists()) {
         throw java.io.FileNotFoundException("Invalid database path: $path")
