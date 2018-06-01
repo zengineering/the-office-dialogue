@@ -4,7 +4,8 @@ import java.io.File
 import java.io.FileNotFoundException
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
-import com.google.gson.Gson import picocli.CommandLine
+import com.google.gson.Gson 
+import picocli.CommandLine
 import picocli.CommandLine.ParentCommand
 import picocli.CommandLine.Command
 import picocli.CommandLine.Option
@@ -27,6 +28,19 @@ fun countSeasonalLines(dbPath: String, lineCountThreshold: Int=100): Map<String,
         }
         seasonalLineCounts.mapValues { (_, counts) -> counts.toMap() }
             .filter { (_, seasons) -> seasons.values.sum() > lineCountThreshold }
+
+        transaction {
+            val maxExpr = OfficeQuotes.episode.max()
+            OfficeQuotes.slice(OfficeQuotes.season, maxExpr)
+                .selectAll()
+                .groupBy(OfficeQuotes.season)
+                .map { it[OfficeQuotes.season] to it[maxExpr] }
+                .forEach { 
+                    println(it)
+                }
+        }
+
+        seasonalLineCounts
     } catch (e: FileNotFoundException) {
         System.err.println("Database not found at '$dbPath'") 
         null
