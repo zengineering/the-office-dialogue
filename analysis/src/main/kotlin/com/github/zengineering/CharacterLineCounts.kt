@@ -11,9 +11,9 @@ import picocli.CommandLine.Command
 import picocli.CommandLine.Option
 import picocli.CommandLine.Parameters
 
-fun countCharacterLines(dbPath: String, lineCountThreshold: Int=100): Map<String, Map<Int, Int>>? {
+fun countCharacterLines(dbPath: String, lineCountThreshold: Int=100): Map<String, Map<Int, Map<Int, Int>>>? {
     return try {
-        var seasonalLineCounts = mutableMapOf<String, MutableMap<Int, Int>>()
+        var seasonalLineCounts = mutableMapOf<String, MutableMap<Int, MutableMap<Int, Int>>>()
         connectDatabase(dbPath)
 
         // Episode count per season per character
@@ -23,23 +23,46 @@ fun countCharacterLines(dbPath: String, lineCountThreshold: Int=100): Map<String
                 .selectAll()
                 .groupBy(OfficeQuotes.season)
                 .orderBy(OfficeQuotes.season)
-                .map { it[maxExpr] }
+                .map { it[maxExpr]!! }
         }
 
-        // Line count per season per character
         transaction {
-            (1..9).forEach { season -> OfficeQuotes
-                .slice(OfficeQuotes.speaker, OfficeQuotes.speaker.count())
-                .select { OfficeQuotes.season eq season }
-                .groupBy(OfficeQuotes.speaker)
-                .forEach {
-                    seasonalLineCounts.getOrPut(it[OfficeQuotes.speaker]) { mutableMapOf<Int, Int>() }
-                        .put(season, it[OfficeQuotes.speaker.count()])
-                 }
+            episodeCounts.forEachIndexed { season, epsCount ->
+                (1..epsCount).forEach { eps -> 
+                    OfficeQuotes
+                        .slice(OfficeQuotes.speaker, OfficeQuotes.episode, OfficeQuotes.speaker.count())
+                        .select { (OfficeQuotes.season eq season) and (OfficeQuotes.episode eq eps)}
+                        .groupBy(OfficeQuotes.speaker)
+                        .map { it[OfficeQuotes.speaker] to it[OfficeQuotes.speaker.count()] }
+                        .forEach { (speaker, lineCount) ->
+                            // speaker
+                            seasonalLineCounts.getOrPut(speaker) { mutableMapOf<Int, MutableMap<Int, Int>>() }
+                                // season
+                                .getOrPut(season) { mutableMapOf<Int, Int>() }
+                                //episode
+                                .put(eps, lineCount)
+                        }
+                }
             }
         }
-        seasonalLineCounts.mapValues { (_, counts) -> counts.toMap() }
-            .filter { (_, seasons) -> seasons.values.sum() > lineCountThreshold }
+        seasonalLineCounts
+
+
+
+        // Line count per season per character
+        //transaction {
+        //    (1..9).forEach { season -> OfficeQuotes
+        //        .slice(OfficeQuotes.speaker, OfficeQuotes.speaker.count())
+        //        .select { OfficeQuotes.season eq season }
+        //        .groupBy(OfficeQuotes.speaker)
+        //        .forEach {
+        //            seasonalLineCounts.getOrPut(it[OfficeQuotes.speaker]) { mutableMapOf<Int, Int>() }
+        //                .put(season, it[OfficeQuotes.speaker.count()])
+        //        }
+        //    }
+        //}
+        //seasonalLineCounts.mapValues { (_, counts) -> counts.toMap() }
+        //    .filter { (_, seasons) -> seasons.values.sum() > lineCountThreshold }
 
     } catch (e: FileNotFoundException) {
         System.err.println("Database not found at '$dbPath'") 
