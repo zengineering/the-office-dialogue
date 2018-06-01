@@ -11,10 +11,12 @@ import picocli.CommandLine.Command
 import picocli.CommandLine.Option
 import picocli.CommandLine.Parameters
 
-fun countSeasonalLines(dbPath: String, lineCountThreshold: Int=100): Map<String, Map<Int, Int>>? {
+fun countCharacterLines(dbPath: String, lineCountThreshold: Int=100): Map<String, Map<Int, Int>>? {
     return try {
         var seasonalLineCounts = mutableMapOf<String, MutableMap<Int, Int>>()
         connectDatabase(dbPath)
+
+        // Line count per season per character
         transaction {
             (1..9).forEach { season -> OfficeQuotes
                 .slice(OfficeQuotes.speaker, OfficeQuotes.speaker.count())
@@ -29,16 +31,15 @@ fun countSeasonalLines(dbPath: String, lineCountThreshold: Int=100): Map<String,
         seasonalLineCounts.mapValues { (_, counts) -> counts.toMap() }
             .filter { (_, seasons) -> seasons.values.sum() > lineCountThreshold }
 
-        transaction {
+        // Episode count per season per character
+        val episodeCounts = transaction {
             val maxExpr = OfficeQuotes.episode.max()
             OfficeQuotes.slice(OfficeQuotes.season, maxExpr)
                 .selectAll()
                 .groupBy(OfficeQuotes.season)
                 .map { it[OfficeQuotes.season] to it[maxExpr] }
-                .forEach { 
-                    println(it)
-                }
         }
+        episodeCounts.forEach { println(it) }
 
         seasonalLineCounts
     } catch (e: FileNotFoundException) {
@@ -63,7 +64,7 @@ class CharacterLineCounts : Runnable {
     override fun run() { 
         Gson().let { gson ->
             File("characterLineCounts.json").let { file ->
-                countSeasonalLines(this.parent.dbPath, lineCount)?.let { file.writeText(gson.toJson(it)) }
+                countCharacterLines(this.parent.dbPath, lineCount)?.let { file.writeText(gson.toJson(it)) }
             }
         }
     }
