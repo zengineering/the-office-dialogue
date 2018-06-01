@@ -16,6 +16,16 @@ fun countCharacterLines(dbPath: String, lineCountThreshold: Int=100): Map<String
         var seasonalLineCounts = mutableMapOf<String, MutableMap<Int, Int>>()
         connectDatabase(dbPath)
 
+        // Episode count per season per character
+        val episodeCounts = transaction {
+            val maxExpr = OfficeQuotes.episode.max()
+            OfficeQuotes.slice(OfficeQuotes.season, maxExpr)
+                .selectAll()
+                .groupBy(OfficeQuotes.season)
+                .orderBy(OfficeQuotes.season)
+                .map { it[maxExpr] }
+        }
+
         // Line count per season per character
         transaction {
             (1..9).forEach { season -> OfficeQuotes
@@ -31,17 +41,6 @@ fun countCharacterLines(dbPath: String, lineCountThreshold: Int=100): Map<String
         seasonalLineCounts.mapValues { (_, counts) -> counts.toMap() }
             .filter { (_, seasons) -> seasons.values.sum() > lineCountThreshold }
 
-        // Episode count per season per character
-        val episodeCounts = transaction {
-            val maxExpr = OfficeQuotes.episode.max()
-            OfficeQuotes.slice(OfficeQuotes.season, maxExpr)
-                .selectAll()
-                .groupBy(OfficeQuotes.season)
-                .map { it[OfficeQuotes.season] to it[maxExpr] }
-        }
-        episodeCounts.forEach { println(it) }
-
-        seasonalLineCounts
     } catch (e: FileNotFoundException) {
         System.err.println("Database not found at '$dbPath'") 
         null
