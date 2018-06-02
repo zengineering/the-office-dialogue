@@ -13,7 +13,7 @@ import picocli.CommandLine.Parameters
 
 fun countCharacterLines(dbPath: String, lineCountThreshold: Int=100): Map<String, Map<Int, Map<Int, Int>>>? {
     return try {
-        var seasonalLineCounts = mutableMapOf<String, MutableMap<Int, MutableMap<Int, Int>>>()
+        var characterLineCounts = mutableMapOf<String, MutableMap<Int, MutableMap<Int, Int>>>()
         connectDatabase(dbPath)
 
         // Episode count per season per character
@@ -36,7 +36,7 @@ fun countCharacterLines(dbPath: String, lineCountThreshold: Int=100): Map<String
                         .map { it[OfficeQuotes.speaker] to it[OfficeQuotes.speaker.count()] }
                         .forEach { (speaker, lineCount) ->
                             // speaker
-                            seasonalLineCounts.getOrPut(speaker) { mutableMapOf<Int, MutableMap<Int, Int>>() }
+                            characterLineCounts.getOrPut(speaker) { mutableMapOf<Int, MutableMap<Int, Int>>() }
                                 // season
                                 .getOrPut(season) { mutableMapOf<Int, Int>() }
                                 //episode
@@ -45,24 +45,9 @@ fun countCharacterLines(dbPath: String, lineCountThreshold: Int=100): Map<String
                 }
             }
         }
-        seasonalLineCounts
-
-
-
-        // Line count per season per character
-        //transaction {
-        //    (1..9).forEach { season -> OfficeQuotes
-        //        .slice(OfficeQuotes.speaker, OfficeQuotes.speaker.count())
-        //        .select { OfficeQuotes.season eq season }
-        //        .groupBy(OfficeQuotes.speaker)
-        //        .forEach {
-        //            seasonalLineCounts.getOrPut(it[OfficeQuotes.speaker]) { mutableMapOf<Int, Int>() }
-        //                .put(season, it[OfficeQuotes.speaker.count()])
-        //        }
-        //    }
-        //}
-        //seasonalLineCounts.mapValues { (_, counts) -> counts.toMap() }
-        //    .filter { (_, seasons) -> seasons.values.sum() > lineCountThreshold }
+        characterLineCounts.filter { (_, seasonCounts) ->
+            seasonCounts.values.sumBy { it.values.sum() } > lineCountThreshold
+        }
 
     } catch (e: FileNotFoundException) {
         System.err.println("Database not found at '$dbPath'") 
