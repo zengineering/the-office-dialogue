@@ -11,40 +11,59 @@ import picocli.CommandLine.Command
 import picocli.CommandLine.Option
 import picocli.CommandLine.Parameters
 
+/**
+ * Count the number of lines spoken by each character in each episode
+ *
+ * @param dbPath Path to database with dialogue
+ * @param lineCountThreshold The minimum number of lines required to include a character
+ * @return Line counts in the form of character -> season -> episode -> line count
+ *
+**/
 fun countCharacterLines(dbPath: String, lineCountThreshold: Int=100): Map<String, Map<Int, Map<Int, Int>>>? {
     return try {
         var characterLineCounts = mutableMapOf<String, MutableMap<Int, MutableMap<Int, Int>>>()
         connectDatabase(dbPath)
 
-        // Episode count per season per character
+        // Episode count per season
         val episodeCounts = transaction {
             val maxExpr = OfficeQuotes.episode.max()
+            // SELECT season, MAX(episode)
             OfficeQuotes.slice(OfficeQuotes.season, maxExpr)
                 .selectAll()
+                // get all seasons
                 .groupBy(OfficeQuotes.season)
+                // sort by season to store in list
                 .orderBy(OfficeQuotes.season)
+                // extract the max(episode)
                 .map { it[maxExpr]!! }
         }
 
         transaction {
+            // for each episode in each season, count the number of lines by each character
             episodeCounts.forEachIndexed { season, epsCount ->
                 (1..epsCount).forEach { eps -> 
                     OfficeQuotes
+                        // SELECT speaker, episode, and number of lines (speaker.count)
                         .slice(OfficeQuotes.speaker, OfficeQuotes.episode, OfficeQuotes.speaker.count())
+                        // filter by season and episode
                         .select { (OfficeQuotes.season eq season) and (OfficeQuotes.episode eq eps)}
+                        // get all speakers
                         .groupBy(OfficeQuotes.speaker)
+                        // map speaker to line count
                         .map { it[OfficeQuotes.speaker] to it[OfficeQuotes.speaker.count()] }
                         .forEach { (speaker, lineCount) ->
-                            // speaker
+                            // insert or get speaker
                             characterLineCounts.getOrPut(speaker) { mutableMapOf<Int, MutableMap<Int, Int>>() }
-                                // season
+                                // insert or get season
                                 .getOrPut(season) { mutableMapOf<Int, Int>() }
-                                //episode
+                                // insert or get episode
                                 .put(eps, lineCount)
                         }
                 }
             }
         }
+
+        // filter by total line count
         characterLineCounts.filter { (_, seasonCounts) ->
             seasonCounts.values.sumBy { it.values.sum() } > lineCountThreshold
         }
