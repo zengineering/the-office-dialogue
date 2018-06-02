@@ -43,20 +43,20 @@ fun countCharacterLines(dbPath: String, lineCountThreshold: Int=100): Map<String
             episodeCounts.forEachIndexed { season, epsCount ->
                 (1..epsCount).forEach { eps -> 
                     OfficeQuotes
-                        // SELECT speaker, episode, and number of lines (speaker.count)
+                        // SELECT speaker, episode, number of lines (speaker.count)
                         .slice(OfficeQuotes.speaker, OfficeQuotes.episode, OfficeQuotes.speaker.count())
                         // filter by season and episode
                         .select { (OfficeQuotes.season eq season) and (OfficeQuotes.episode eq eps)}
-                        // get all speakers
+                        // group by speaker
                         .groupBy(OfficeQuotes.speaker)
-                        // map speaker to line count
+                        // extract speaker ans line count
                         .map { it[OfficeQuotes.speaker] to it[OfficeQuotes.speaker.count()] }
                         .forEach { (speaker, lineCount) ->
-                            // insert or get speaker
+                            // get/insert speaker
                             characterLineCounts.getOrPut(speaker) { mutableMapOf<Int, MutableMap<Int, Int>>() }
-                                // insert or get season
+                                // get/insert season
                                 .getOrPut(season) { mutableMapOf<Int, Int>() }
-                                // insert or get episode
+                                // get/insert episode
                                 .put(eps, lineCount)
                         }
                 }
@@ -77,7 +77,7 @@ fun countCharacterLines(dbPath: String, lineCountThreshold: Int=100): Map<String
 @Command(
     mixinStandardHelpOptions = true, 
     name = "countCharacterLines", 
-    version = arrayOf("v0.1"),
+    version = arrayOf("v0.2"),
     description = arrayOf("Produce JSON of the form {character: { season : line count }} from SQLite db.")
 )
 class CharacterLineCounts : Runnable {
@@ -87,6 +87,7 @@ class CharacterLineCounts : Runnable {
     @Option(names = arrayOf("-l", "--line-count"), description = arrayOf("Minimum threshold for total line count per character (default=100)"))
     var lineCount = 100
 
+    // Get line counts per character; convert to json; write to file
     override fun run() { 
         Gson().let { gson ->
             File("characterLineCounts.json").let { file ->
