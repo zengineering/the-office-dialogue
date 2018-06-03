@@ -40,7 +40,7 @@ fun countCharacterLines(dbPath: String, lineCountThreshold: Int=100): Map<String
 
         transaction {
             // for each episode in each season, count the number of lines by each character
-            //   this could be improved; but this allows for explicit results 
+            // The current method could be improved, but it allows for explicit results 
             //   (and manual corrections of the json)
             (1..9).zip(episodeCounts).forEach { (season, epsCount) ->
                 (1..epsCount).forEach { eps -> 
