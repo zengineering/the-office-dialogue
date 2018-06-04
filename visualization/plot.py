@@ -36,7 +36,6 @@ class Character():
         return sum(self.lines_per_episode)
 
 
-
 def parseArgs():
     '''
     Commandline argument parsing
