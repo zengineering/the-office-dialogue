@@ -115,27 +115,54 @@ def main(json_path):
     episodes = np.array([char.episodes for char in character_data])
     lines_per_episode = np.array([char.lines_per_episode for char in character_data])
 
+    #------------------
     # dialogue lines
     order = lines.sum(axis=1).argsort()
     stackedBarByCharacter(names[order], lines[order], "the-office-lines.png", title="Lines of dialogue", xticks=np.arange(0, 13001, 1000))
 
+    #------------------
     # episodes
     order = episodes.sum(axis=1).argsort()
     stackedBarByCharacter(names[order], episodes[order], "the-office-episodes.png", title="Episodes with dialogue")
 
+    #------------------
     # lines per episode (per season)
     order = lines_per_episode.sum(axis=1).argsort()
     stackedBarByCharacter(names[order], lines_per_episode[order], "the-office-lines-per-episode-seasonal.png", title="Seasonal average lines of dialogue per episode")
 
+    #------------------
     # lines per episode (overall)
     olpe = lines.sum(axis=1) / episodes.sum(axis=1)
     order = olpe.argsort()
     barByCharacter(names[order], olpe[order], "the-office-lines-per-episode-overall.png", title="Overall average lines of dialogue per episode")
 
+    #------------------
     # stdev of lines-per-episode
     lpe_std = lines_per_episode.std(axis=1)
     order = lpe_std.argsort()
     barByCharacter(names[order], lpe_std[order], "the-office-lines-per-episode-std.png", title="Standard deviation of lines of dialogue per episode")
+
+    #------------------
+    # total line percentages
+
+    # main characters, their colors and indices
+    primary = ("Andy", "Dwight", "Jim", "Michael", "Pam")
+    colors = ("red", "gold", "dodgerblue", "limegreen", "mediumpurple", "silver")
+    primary_idx = np.array([np.where(names==p)[0][0] for p in primary])
+
+    # sums of primaries and everyone else
+    lines_sum = lines.sum(axis=1)
+    primary_mask = np.zeros(names.shape[0], np.bool)
+    primary_mask[primary_idx] = 1
+    sums = np.append(lines_sum[primary_mask], lines_sum[np.invert(primary_mask)].sum())
+
+    # pie plot
+    mplot.axis("equal")
+    mplot.pie(sums, labels=np.append(names[primary_mask], "Everyone Else"), autopct='%1.1f%%', colors=colors)
+    mplot.title("Total dialogue percentage")
+    mplot.savefig("the-office-pie.png", orientation="landscape", dpi=200)
+    mplot.close()
+
 
 
 if __name__ == "__main__":
