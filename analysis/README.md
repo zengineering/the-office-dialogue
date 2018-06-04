@@ -7,15 +7,6 @@ Database interactions using [Exposed](https://github.com/JetBrains/Exposed).
 
 #### Corrections
 - [ ] Correct dialogue source errors
-    + [ ] Names (*in progress*)
+    + [ ] Names (*misspellings done*)
     + [ ] Lines
-
-
-#### Character Dialogue Analyses
-Scope       | Lines              | Words
------------ | -----              | -----
-Per season  | :white_check_mark: |      
-Per episode |                    |      
-Per scene   |                    |      
-
 
