@@ -68,7 +68,7 @@ def parseData(json_path):
     return characters
 
 
-def plotByCharacter(names, data, outfile, *, title=None, xticks=None, bar_height=0.8, colors=None, dpi=200, font_size=6):
+def stackedBarByCharacter(names, data, outfile, *, title=None, xticks=None, bar_height=0.8, colors=None, dpi=200, font_size=6):
     '''
     Plot a horizontal-stacked-bar chart of character info
     '''
@@ -80,11 +80,28 @@ def plotByCharacter(names, data, outfile, *, title=None, xticks=None, bar_height
 
     plots = [mplot.barh(y_pos, data[:, s], bar_height, data[:, 0:s].sum(1), color=colors[s]) for s in seasons]
 
+    if mplot.title:
+        mplot.title(title)
+    if xticks is not None:
+        mplot.xticks(xticks, fontsize=font_size)
+    mplot.yticks(y_pos, names, fontsize=font_size)
+    mplot.legend((p[0] for p in plots), ("Season {}".format(s) for s in seasons), fontsize=font_size)
+    mplot.savefig(outfile, orientation="landscape", dpi=dpi)
+    mplot.close()
+
+
+def barByCharacter(names, data, outfile, *, title=None, xticks=None, bar_height=0.8, colors=None, dpi=200, font_size=6):
+    '''
+    Plot a horizontal-stacked-bar chart of character info
+    '''
+    y_pos = np.arange(len(names))
+
+    mplot.barh(y_pos, data, bar_height)
+
     mplot.title(title)
     mplot.yticks(y_pos, names, fontsize=font_size)
     if xticks is not None:
         mplot.xticks(xticks, fontsize=font_size)
-    mplot.legend((p[0] for p in plots), ("Season {}".format(s) for s in seasons), fontsize=font_size)
     mplot.savefig(outfile, orientation="landscape", dpi=dpi)
     mplot.close()
 
@@ -95,25 +112,32 @@ def main(json_path):
     TODO: DRY this out.
     '''
     character_data = parseData(json_path)
-
-    # dialogue lines
-    character_data.sort(key=lambda char: char.total_lines)
     names = np.array([char.name for char in character_data])
     lines = np.array([char.lines for char in character_data])
-    plotByCharacter(names, lines, "the-office-lines.png", title="Dialogue lines per character", xticks=np.arange(0, 13001, 1000))
+    episodes = np.array([char.episodes for char in character_data])
+    lines_per_episode = np.array([char.lines_per_episode for char in character_data])
+
+    # dialogue lines
+    order = lines.sum(axis=1).argsort()
+    stackedBarByCharacter(names[order], lines[order], "the-office-lines.png", title="Lines of dialogue", xticks=np.arange(0, 13001, 1000))
 
     # episodes
-    character_data.sort(key=lambda char: char.total_episodes)
-    names = np.array([char.name for char in character_data])
-    episodes = np.array([char.episodes for char in character_data])
-    plotByCharacter(names, episodes, "the-office-episodes.png", title="Episodes (with dialogue) per character")
+    order = episodes.sum(axis=1).argsort()
+    stackedBarByCharacter(names[order], episodes[order], "the-office-episodes.png", title="Episodes with dialogue")
 
-    # lines per episode
-    character_data.sort(key=lambda char: char.total_lines_per_episode)
-    names = np.array([char.name for char in character_data])
-    lines_per_episode = np.array([char.lines_per_episode for char in character_data])
-    plotByCharacter(names, lines_per_episode, "the-office-lines-per-episode.png", title="Dialogue lines per episode per character")
+    # lines per episode (per season)
+    order = lines_per_episode.sum(axis=1).argsort()
+    stackedBarByCharacter(names[order], lines_per_episode[order], "the-office-lines-per-episode-seasonal.png", title="Seasonal average lines of dialogue per episode")
 
+    # lines per episode (overall)
+    olpe = lines.sum(axis=1) / episodes.sum(axis=1)
+    order = olpe.argsort()
+    barByCharacter(names[order], olpe[order], "the-office-lines-per-episode-overall.png", title="Overall average lines of dialogue per episode")
+
+    # stdev of lines-per-episode
+    lpe_std = lines_per_episode.std(axis=1)
+    order = lpe_std.argsort()
+    barByCharacter(names[order], lpe_std[order], "the-office-lines-per-episode-std.png", title="Standard deviation of lines of dialogue per episode")
 
 if __name__ == "__main__":
     args = parseArgs()
