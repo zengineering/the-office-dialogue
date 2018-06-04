@@ -92,7 +92,7 @@ def stackedBarByCharacter(names, data, outfile, *, title=None, xticks=None, bar_
 
 def barByCharacter(names, data, outfile, *, title=None, xticks=None, bar_height=0.8, colors=None, dpi=200, font_size=6):
     '''
-    Plot a horizontal-stacked-bar chart of character info
+    Plot a horizontal-bar chart of character info
     '''
     y_pos = np.arange(len(names))
 
@@ -108,8 +108,7 @@ def barByCharacter(names, data, outfile, *, title=None, xticks=None, bar_height=
 
 def main(json_path):
     '''
-    Parse JSON and plot it.
-    TODO: DRY this out.
+    Parse JSON; format and plot it
     '''
     character_data = parseData(json_path)
     names = np.array([char.name for char in character_data])
@@ -138,6 +137,7 @@ def main(json_path):
     lpe_std = lines_per_episode.std(axis=1)
     order = lpe_std.argsort()
     barByCharacter(names[order], lpe_std[order], "the-office-lines-per-episode-std.png", title="Standard deviation of lines of dialogue per episode")
+
 
 if __name__ == "__main__":
     args = parseArgs()
