@@ -36,8 +36,13 @@ reads the database and exports a JSON file characterLineCounts.json of the form:
 ```
 
 
-#### Corrections
-- [ ] Correct dialogue source errors
-    + [ ] Names (*misspellings done*)
-    + [ ] Lines
+#### Corrections needed in dialogue source
++ Names 
+    + [x] misspellings
+    + [ ] multiple characters with the same names
+    + [ ] multiple speakers for the same line
++ Lines
+    + [ ] normalize dash vs hyphen
+    + [ ] normalize 3-periods vs ellipsis
+    + [ ] quote ("", '') characters
 
