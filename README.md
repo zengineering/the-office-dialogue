@@ -5,3 +5,4 @@
 - Data source is [here](http://officequotes.net/).
 - *acqusition/* contains tools to scrape the source website, download all dialogue and store it in a SQLite database.
 - *analysis/* contains tools for performing various types of analysis and export the results to JSON.
+- *visualization/* contains tools for creating plots based on the previously created JSON.
