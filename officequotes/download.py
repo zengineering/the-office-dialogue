@@ -8,7 +8,7 @@ from threading import Thread
 from sys import stderr
 from argparse import ArgumentParser
 from database import Database, OfficeQuote
-from containers import Episode
+from dataclasses import Episode
 from parse import extractMatchingUrls, parseEpisodePage
 
 

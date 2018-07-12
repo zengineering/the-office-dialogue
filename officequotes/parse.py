@@ -1,5 +1,5 @@
 from bs4 import BeautifulSoup, SoupStrainer, Doctype
-from containers import Quote
+from dataclasses import Quote
 from itertools import chain
 
 
