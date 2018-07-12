@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup, SoupStrainer, Doctype
-from containers import Quote, Scene
+from containers import Quote
+from itertools import chain
 
 
 def removeDoctypes(soup):
@@ -36,7 +37,7 @@ def parseEpisodePage(content):
     scene_texts = [quote_div.text for quote_div in removeDoctypes(soup)]
 
     # filter empty qutoe blocks
-    return (parseScene(st) for st in scene_texts if st.strip())
+    return chain.from_iterable(parseScene(st) for st in scene_texts if st.strip())
 
 
 def parseScene(scene_text):
@@ -57,6 +58,6 @@ def parseScene(scene_text):
         if len(pair) != 2:
             #print("Skipping line with unexpected format: {}".format(line))
             continue
-        quotes.append(Quote(*pair))
+        quotes.append(Quote(*pair, deleted))
 
-    return Scene(quotes, deleted)
+    return quotes
