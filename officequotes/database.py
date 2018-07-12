@@ -1,11 +1,23 @@
-from sqlalchemy import create_engine, Column, Integer, Text, Boolean
+from sqlalchemy import create_engine, Column, Integer, Text, Boolean, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, relationship
 from os.path import realpath
 from contextlib import contextmanager
 
 Base = declarative_base()
 Session = sessionmaker()
+
+
+class Characters(Base):
+    __tablename__ = "characters"
+    id = Column(Integer, primary_key=True)
+    name = Column(Text)
+
+class DialogueLine(Base):
+    __tablename__ = "lines"
+    id = Column(Integer, primary_key=True)
+    content = Column(Text)
+
 
 class OfficeQuote(Base):
     __tablename__ = "office_quotes"
@@ -13,14 +25,13 @@ class OfficeQuote(Base):
     id = Column(Integer, primary_key=True)
     season = Column(Integer)
     episode = Column(Integer)
-    scene = Column(Integer)
-    speaker = Column(Text)
-    line = Column(Text)
+    speaker = Column(Integer, ForeignKey('characters.id'))
+    line = Column(Integer, ForeignKey('lines.id'))
     deleted = Column(Boolean)
 
     def __repr__(self):
-        return "<OfficeQuote(season={}, episode={}, scene={}, speaker={}, line={}, deleted={})>".format(
-            self.season, self.episode, self.scene, self.speaker, self.line, self.deleted) 
+        return "<OfficeQuote(season={}, episode={}, speaker={}, line={}, deleted={})>".format(
+            self.season, self.episode, self.speaker, self.line, self.deleted)
 
 
 class Database():
