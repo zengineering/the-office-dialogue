@@ -25,7 +25,7 @@ def episodeToDatabase(episode, db):
         and write them to a database.
     '''
     quotes = []
-    for scene_index, scene in enumerate(episode.scenes, 1):
+    for scene_index, scene in enumerate(episode.quotes, 1):
         for quote in scene.quotes:
             quotes.append(OfficeQuote(
                 season=episode.season,
@@ -76,13 +76,12 @@ def episodeFactory(eps_url, eps_url_pattern, index_url):
         url = urljoin(index_url, eps_url)
         content = fetchContent(url)
         if content:
-            scenes = parseEpisodePage(content)
-            if scenes:
-                return Episode(episode, season, scenes)
+            quotes = parseEpisodePage(content)
+            return Episode(episode, season, quotes)
+        else:
+            return None
     except requests.RequestException as e:
         print("Request for {} failed:\n\t{}".format(eps_url, e), file=stderr)
-    #except HTMLParseError as e:
-    #    print("Parsing for {} failed:\n\t{}".format(eps_url, e), stderr)
     except Exception as e:
         print("Episode from url {} failed:\n\t{}".format(eps_url, e), file=stderr)
 
@@ -92,6 +91,7 @@ def fetchAndParse(url_q, episode_q, failed_q, eps_href_re, index_url):
     Pop a url from the url queue
     Download and parse the episode page at that url
     Push the parsed result into the episode queue
+    If parsing or downloading fails, put it in the failed queue
     '''
     while not url_q.empty():
         eps_url = url_q.get()
