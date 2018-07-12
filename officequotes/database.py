@@ -8,15 +8,18 @@ Base = declarative_base()
 Session = sessionmaker()
 
 
-class Characters(Base):
+class Character(Base):
     __tablename__ = "characters"
     id = Column(Integer, primary_key=True)
-    name = Column(Text)
+    name = Column(Text, nullable=False)
+    quote = relationship("OfficeQuote", back_populates="speaker")
+
 
 class DialogueLine(Base):
     __tablename__ = "lines"
     id = Column(Integer, primary_key=True)
-    content = Column(Text)
+    content = Column(Text, nullable=False)
+    quote = relationship("OfficeQuote", uselist=False, back_populates="line")
 
 
 class OfficeQuote(Base):
@@ -25,13 +28,16 @@ class OfficeQuote(Base):
     id = Column(Integer, primary_key=True)
     season = Column(Integer)
     episode = Column(Integer)
-    speaker = Column(Integer, ForeignKey('characters.id'))
-    line = Column(Integer, ForeignKey('lines.id'))
+    speaker_id = Column(Integer, ForeignKey('characters.id'))
+    speaker = relationship('Character', uselist=False, back_populates='quote')
+    line_id = Column(Integer, ForeignKey('lines.id'))
+    line = relationship('DialogueLine', uselist=False, back_populates='quote')
     deleted = Column(Boolean)
 
+
     def __repr__(self):
-        return "<OfficeQuote(season={}, episode={}, speaker={}, line={}, deleted={})>".format(
-            self.season, self.episode, self.speaker, self.line, self.deleted)
+        return "<OfficeQuote(season={}, episode={}, speaker_id={}, line_id={}, deleted={})>".format(
+            self.season, self.episode, self.speaker_id, self.line_id, self.deleted)
 
 
 class Database():
