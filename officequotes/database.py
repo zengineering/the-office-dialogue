@@ -74,4 +74,3 @@ class Database():
 
             self.add(quote)
 
-

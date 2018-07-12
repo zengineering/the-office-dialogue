@@ -7,7 +7,6 @@ from urllib.parse import urljoin
 from queue import Queue
 from threading import Thread
 from sys import stderr
-from argparse import ArgumentParser
 from database import Database, OfficeQuote
 from dataclasses import Episode
 from parse import extractMatchingUrls, parseEpisodePage
@@ -96,19 +95,11 @@ def downloadProgress(url_q):
             total_episodes - url_q.qsize(), url_q.qsize()), end="\r")
 
 
-def parseArgs():
-    ap = ArgumentParser(description="Download and store all dialogue from The Office.")
-    ap.add_argument("-t", "--threads", type=int, default=16, help="Number of downloading threads.")
-    ap.add_argument("-o", "--database", type=str, default="the-office-quotes.sqlite",
-        help="SQLite database to write results to.")
-    return ap.parse_args()
-
-
 @click.command()
 @click.option('--thread_count', '-t', default=16, help="Number of downloading threads.")
 @click.option('--db_file', default="the-office-quotes.sqlite",
               help="SQLite database to write results to.")
-def download(thread_count, db_file)
+def download(thread_count, db_file):
 
     # get the index page and all episode urls
     index_content = fetchContent(index_url)
@@ -152,5 +143,3 @@ def download(thread_count, db_file)
         while not failed_q.empty():
             print(failed_q.get())
 
-
-main()
