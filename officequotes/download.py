@@ -19,24 +19,6 @@ req_headers = {"User-Agent":
 }
 
 
-def episodeToDatabase(episode, db):
-    '''
-    Convert each quote in an episode into the database schema class
-        and write them to a database.
-    '''
-    quotes = []
-    for scene_index, scene in enumerate(episode.quotes, 1):
-        for quote in scene.quotes:
-            quotes.append(OfficeQuote(
-                season=episode.season,
-                episode=episode.number,
-                scene=scene_index,
-                speaker=quote.speaker,
-                line=quote.line,
-                deleted=scene.deleted))
-    db.addQuotes(quotes)
-
-
 def writeToDatabase(db, queue, eps_count):
     '''
     Write <eps_count> episodes in the queue to a database.
@@ -46,7 +28,7 @@ def writeToDatabase(db, queue, eps_count):
         try:
             episode = queue.get()
             if episode:
-                episodeToDatabase(episode, db)
+                db.addEpisode(episode)
                 successful += 1
                 print("Stored {} episodes successfully;".format(successful), end=" ")
         except Exception as e:

@@ -2,7 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from os.path import realpath
 from contextlib import contextmanager
-from . import Base
+from tables import Base, Character, DialogueLine, OfficeQuote
 
 
 Session = sessionmaker()
@@ -36,18 +36,42 @@ class Database():
         finally:
             session.close()
 
-    def addQuote(self, quote):
-        """
-        Add quote to database
-        """
-        with self.session_scope() as session:
-            session.add(quote) # dialogLine instance
 
-    def addQuotes(self, quotes):
+    def add(self, entry):
         """
-        Add multiple quotes to database
+        Add entry to the database
         """
         with self.session_scope() as session:
-            for quote in quotes:
-                session.add(quote) # dialogLine instance
+            session.add(entry)
+
+
+    def getOrCreate(self, model, **kwargs):
+        """
+        Get an item from the db if it exists; if not, create it
+        """
+        with self.session_scope() as session:
+            instance = session.query(model).filter_by(**kwargs).first()
+            if instance:
+                return instance
+            else:
+                instance = model(**kwargs)
+                session.add(instance)
+                return instance
+
+
+    def addEpisode(self, episode):
+        """
+        Convert each quote in an episode into the database schema class
+            and write them to the database.
+        """
+        for quote in episode.quotes:
+            db_quote = OfficeQuote(
+                season=episode.season,
+                episode=episode.number,
+                deleted=scene.deleted))
+            db_quote.speaker = self.getOrCreate(session, Character, name=quote.speaker)
+            db_quote.line = DialogueLine(content=quote.line)
+
+            self.add(quote)
+
 
