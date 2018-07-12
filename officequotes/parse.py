@@ -4,21 +4,26 @@ from itertools import chain
 
 
 def removeDoctypes(soup):
+    '''
+    Remove all Doctype from soup
+    '''
     return filter(lambda t: not isinstance(t, Doctype), soup)
 
 
-def extractMatchingUrls(content, href):
+def extractMatchingUrls(content, pattern):
+    '''
+    Extract an iterable of URLs matching the given pattern
+    '''
     # extract the a tags with href's matching the re pattern
-    a_tags = removeDoctypes(BeautifulSoup(content, "lxml", parse_only=SoupStrainer("a", href=href)))
+    a_tags = removeDoctypes(BeautifulSoup(content, "lxml", parse_only=SoupStrainer("a", href=pattern)))
     # filter out Doctype's and extract the urls
     return map(lambda a: a["href"], a_tags)
 
 
-def parseEpisodePage(content):
-    # parse only <div class="quote"> blocks
-    # NOTE: filter Doctype because SoupStrainer does not remove them
-    soup = BeautifulSoup(content, "lxml", parse_only=SoupStrainer("div", {"class": "quote"}))
-
+def strainSoup(soup):
+    '''
+    Remove undesired html tags from soup
+    '''
     # remove font setting (<b>, <i>, <u>) tags
     tags_to_remove = ("b", "i", "u")
     for tag in tags_to_remove:
@@ -33,6 +38,17 @@ def parseEpisodePage(content):
     for spacer in soup.findAll("div", {"class": "spacer"}):
         spacer.decompose()
 
+
+def parseEpisodePage(content):
+    '''
+    Return a list of extracted Quotes from an episode page
+    '''
+    # parse only <div class="quote"> blocks
+    # NOTE: filter Doctype because SoupStrainer does not remove them
+    soup = BeautifulSoup(content, "lxml", parse_only=SoupStrainer("div", {"class": "quote"}))
+
+    strainSoup(soup)
+
     # extract text from each quote block (scene)
     scene_texts = [quote_div.text for quote_div in removeDoctypes(soup)]
 
@@ -41,6 +57,9 @@ def parseEpisodePage(content):
 
 
 def parseScene(scene_text):
+    '''
+    Return a list of extracted Quotes from a scene block
+    '''
     # split on newlines and remove empty items
     scene = list(filter(lambda string: string and not string.isspace(), scene_text.split("\n")))
 
