@@ -1,0 +1,11 @@
+beautifulsoup4
+certifi
+chardet
+idna
+lxml
+requests
+SQLAlchemy
+urllib3
+attrs
+matplotlib
+click
