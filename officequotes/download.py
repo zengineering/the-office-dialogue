@@ -2,6 +2,7 @@
 
 import requests
 import re
+import click
 from urllib.parse import urljoin
 from queue import Queue
 from threading import Thread
@@ -17,6 +18,8 @@ req_headers = {"User-Agent":
      "AppleWebKit/537.36 (KHTML, like Gecko) "
      "Chrome/63.0.3239.140 Safari/537.36")
 }
+index_url = "http://www.officequotes.net/index.php"
+eps_href_re = re.compile("no(\d)-(\d+).php")
 
 
 def writeToDatabase(db, queue, eps_count):
@@ -101,12 +104,11 @@ def parseArgs():
     return ap.parse_args()
 
 
-def main():
-    args = parseArgs()
-    num_threads = args.threads
-    db_file = args.database
-    index_url = "http://www.officequotes.net/index.php"
-    eps_href_re = re.compile("no(\d)-(\d+).php")
+@click.command()
+@click.option('--thread_count', '-t', default=16, help="Number of downloading threads.")
+@click.option('--db_file', default="the-office-quotes.sqlite",
+              help="SQLite database to write results to.")
+def download(thread_count, db_file)
 
     # get the index page and all episode urls
     index_content = fetchContent(index_url)
@@ -130,7 +132,7 @@ def main():
     # producer threads for fetching and parsing episode pages
     thread_pool = [
         Thread(target=fetchAndParse, args=(url_q, episode_q, failed_q, eps_href_re, index_url))
-        for _ in range(num_threads)
+        for _ in range(thread_count)
     ]
 
     # start the threads
