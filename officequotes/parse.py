@@ -20,7 +20,7 @@ def extractMatchingUrls(content, pattern):
     return map(lambda a: a["href"], a_tags)
 
 
-def strainSoup(soup):
+def removeTags(soup):
     '''
     Remove undesired html tags from soup
     '''
@@ -46,7 +46,7 @@ def parseEpisode(content):
     # parse only <div class="quote"> blocks
     soup = BeautifulSoup(content, "lxml", parse_only=SoupStrainer("div", {"class": "quote"}))
 
-    strainSoup(soup)
+    removeTags(soup)
 
     # Extract text from each tag (scene)
     # NOTE: filter Doctype because SoupStrainer does not remove them

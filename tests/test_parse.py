@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup, Doctype
 from itertools import tee
 
 from context import parse, dataclasses
-from parse import withoutDoctypes, strainSoup, parseScene, parseEpisode
+from parse import withoutDoctypes, removeTags, parseScene, parseEpisode
 from dataclasses import Quote
 
 
@@ -13,8 +13,8 @@ def test_withoutDoctypes(testSoup):
     assert not any(map(lambda t: isinstance(t, Doctype), filtered_soup))
 
 
-def test_strainSoup(testSoup):
-    strainSoup(testSoup)
+def test_removeTags(testSoup):
+    removeTags(testSoup)
     for tag in 'biu':
         assert not testSoup(tag)
     assert not testSoup('br')

@@ -29,7 +29,7 @@ def testSoup():
 def episodeSoup():
     html = episodeHtml()
     soup = BeautifulSoup(html, "lxml", parse_only=SoupStrainer("div", {"class": "quote"}))
-    parse.strainSoup(soup)
+    parse.removeTags(soup)
     return soup
 
 
