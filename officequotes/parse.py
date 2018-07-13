@@ -3,7 +3,7 @@ from dataclasses import Quote
 from itertools import chain
 
 
-def removeDoctypes(soup):
+def withoutDoctypes(soup):
     '''
     Remove all Doctype from soup
     '''
@@ -15,7 +15,7 @@ def extractMatchingUrls(content, pattern):
     Extract an iterable of URLs matching the given pattern
     '''
     # extract the a tags with href's matching the re pattern
-    a_tags = removeDoctypes(BeautifulSoup(content, "lxml", parse_only=SoupStrainer("a", href=pattern)))
+    a_tags = withoutDoctypes(BeautifulSoup(content, "lxml", parse_only=SoupStrainer("a", href=pattern)))
     # filter out Doctype's and extract the urls
     return map(lambda a: a["href"], a_tags)
 
@@ -50,7 +50,7 @@ def parseEpisodePage(content):
     strainSoup(soup)
 
     # extract text from each quote block (scene)
-    scene_texts = [quote_div.text for quote_div in removeDoctypes(soup)]
+    scene_texts = [quote_div.text for quote_div in withoutDoctypes(soup)]
 
     # filter empty qutoe blocks
     return chain.from_iterable(parseScene(st) for st in scene_texts if st.strip())
