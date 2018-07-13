@@ -1,8 +1,10 @@
 import pytest
 from bs4 import BeautifulSoup, Doctype
+from itertools import tee
 
-from context import parse
-from parse import withoutDoctypes, strainSoup
+from context import parse, dataclasses
+from parse import withoutDoctypes, strainSoup, parseScene, parseEpisode
+from dataclasses import Quote
 
 
 def test_withoutDoctypes(testSoup):
@@ -20,6 +22,31 @@ def test_strainSoup(testSoup):
 
 
 def test_quote_extraction(episodeSoup):
-    strainSoup(episodeSoup)
     for tag in withoutDoctypes(episodeSoup):
         assert tag['class'] == ['quote']
+
+
+def test_parseScene(episodeSoup):
+    scene_text = next(quote_div.text for quote_div in withoutDoctypes(episodeSoup))
+    quotes = parseScene(scene_text)
+
+    first = quotes[0]
+    assert first.speaker == "Dwight"
+    assert "experience is the best teacher" in first.line
+    assert first.deleted == False
+
+
+def test_parseEpisode(episodeHtml):
+    quotes = parseEpisode(episodeHtml)
+
+    quote = next(quotes)
+    assert quote.speaker == "Dwight"
+    assert "experience is the best teacher" in quote.line
+    assert quote.deleted == False
+
+    for quote in quotes:
+        pass
+
+    assert quote.speaker == "Michael"
+    assert "laughter is the best medicine" in quote.line
+    assert quote.deleted == False

@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup, SoupStrainer
 from pathlib import Path
 
 from context import test_path
+from context import parse
 
 @pytest.fixture
 def testSoup():
@@ -26,7 +27,14 @@ def testSoup():
 
 @pytest.fixture
 def episodeSoup():
-    with open(Path(test_path)/'data/no5-13.php', 'rb') as f:
-        soup = BeautifulSoup(f, "lxml", parse_only=SoupStrainer("div", {"class": "quote"}))
-
+    html = episodeHtml()
+    soup = BeautifulSoup(html, "lxml", parse_only=SoupStrainer("div", {"class": "quote"}))
+    parse.strainSoup(soup)
     return soup
+
+
+@pytest.fixture
+def episodeHtml():
+    with open(Path(test_path)/'data/no5-13.php', 'rb') as f:
+        content = f.read()
+    return content
