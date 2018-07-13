@@ -44,12 +44,12 @@ def parseEpisodePage(content):
     Return a list of extracted Quotes from an episode page
     '''
     # parse only <div class="quote"> blocks
-    # NOTE: filter Doctype because SoupStrainer does not remove them
     soup = BeautifulSoup(content, "lxml", parse_only=SoupStrainer("div", {"class": "quote"}))
 
     strainSoup(soup)
 
-    # extract text from each quote block (scene)
+    # Extract text from each tag (scene)
+    # NOTE: filter Doctype because SoupStrainer does not remove them
     scene_texts = [quote_div.text for quote_div in withoutDoctypes(soup)]
 
     # filter empty qutoe blocks

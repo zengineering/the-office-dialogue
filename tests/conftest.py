@@ -1,9 +1,11 @@
 import pytest
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, SoupStrainer
+from pathlib import Path
 
+from context import test_path
 
 @pytest.fixture
-def soup():
+def testSoup():
     html = (
         '<!DOCTYPE html> <html> '
         '<head> <title>Page Title</title> </head> '
@@ -20,3 +22,11 @@ def soup():
         '</html>'
     )
     return BeautifulSoup(html, "lxml")
+
+
+@pytest.fixture
+def episodeSoup():
+    with open(Path(test_path)/'data/no5-13.php', 'rb') as f:
+        soup = BeautifulSoup(f, "lxml", parse_only=SoupStrainer("div", {"class": "quote"}))
+
+    return soup
