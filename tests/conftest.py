@@ -38,3 +38,9 @@ def episodeHtml():
     with open(Path(test_path)/'data/no5-13.php', 'rb') as f:
         content = f.read()
     return content
+
+@pytest.fixture
+def indexHtml():
+    with open(Path(test_path)/'data/index.php', 'rb') as f:
+        content = f.read()
+    return content

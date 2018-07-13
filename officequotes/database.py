@@ -68,7 +68,7 @@ class Database():
             db_quote = OfficeQuote(
                 season=episode.season,
                 episode=episode.number,
-                deleted=scene.deleted))
+                deleted=scene.deleted)
             db_quote.speaker = self.getOrCreate(session, Character, name=quote.speaker)
             db_quote.line = DialogueLine(content=quote.line)
 

@@ -7,3 +7,4 @@ sys.path.insert(0, str(test_path.parent/'officequotes'))
 
 import parse
 import dataclasses
+import download

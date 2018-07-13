@@ -3,8 +3,9 @@ from bs4 import BeautifulSoup, Doctype
 from itertools import tee
 
 from context import parse, dataclasses
-from parse import withoutDoctypes, removeTags, parseScene, parseEpisode
+from parse import withoutDoctypes, removeTags, parseScene, parseEpisode, extractMatchingUrls
 from dataclasses import Quote
+from download import eps_href_re
 
 
 def test_withoutDoctypes(testSoup):
@@ -50,3 +51,13 @@ def test_parseEpisode(episodeHtml):
     assert quote.speaker == "Michael"
     assert "laughter is the best medicine" in quote.line
     assert quote.deleted == False
+
+
+def test_extractMatchingUrls(indexHtml):
+    '''
+    Extract an iterable of URLs matching the given pattern
+    '''
+    urls = list(extractMatchingUrls(indexHtml, eps_href_re))
+    assert len(urls) == 186
+    assert "no1-01.php" in urls
+    assert "no9-23.php" in urls
