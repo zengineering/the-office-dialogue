@@ -53,7 +53,7 @@ def parseEpisode(content):
     scene_texts = (quote_div.text for quote_div in withoutDoctypes(soup))
 
     # filter empty qutoe blocks
-    return chain.from_iterable(parseScene(st) for st in scene_texts if st.strip())
+    return list(chain.from_iterable(parseScene(st) for st in scene_texts if st.strip()))
 
 
 def parseScene(scene_text):

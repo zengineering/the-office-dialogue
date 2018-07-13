@@ -31,26 +31,24 @@ def test_parseScene(episodeSoup):
     scene_text = next(quote_div.text for quote_div in withoutDoctypes(episodeSoup))
     quotes = parseScene(scene_text)
 
-    first = quotes[0]
-    assert first.speaker == "Dwight"
-    assert "experience is the best teacher" in first.line
-    assert first.deleted == False
+    assert len(quotes) == 1
+    assert quotes[0].speaker == "Dwight"
+    assert "experience is the best teacher" in quotes[0].line
+    assert quotes[0].deleted == False
 
 
 def test_parseEpisode(episodeHtml):
     quotes = parseEpisode(episodeHtml)
 
-    quote = next(quotes)
-    assert quote.speaker == "Dwight"
-    assert "experience is the best teacher" in quote.line
-    assert quote.deleted == False
+    first = quotes[0]
+    assert first.speaker == "Dwight"
+    assert "experience is the best teacher" in first.line
+    assert first.deleted == False
 
-    for quote in quotes:
-        pass
-
-    assert quote.speaker == "Michael"
-    assert "laughter is the best medicine" in quote.line
-    assert quote.deleted == False
+    last = quotes[-1]
+    assert last.speaker == "Michael"
+    assert "laughter is the best medicine" in last.line
+    assert last.deleted == False
 
 
 def test_extractMatchingUrls(indexHtml):
