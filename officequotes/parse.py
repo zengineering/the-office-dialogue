@@ -39,7 +39,7 @@ def strainSoup(soup):
         spacer.decompose()
 
 
-def parseEpisodePage(content):
+def parseEpisode(content):
     '''
     Return a list of extracted Quotes from an episode page
     '''
@@ -50,7 +50,7 @@ def parseEpisodePage(content):
 
     # Extract text from each tag (scene)
     # NOTE: filter Doctype because SoupStrainer does not remove them
-    scene_texts = [quote_div.text for quote_div in withoutDoctypes(soup)]
+    scene_texts = (quote_div.text for quote_div in withoutDoctypes(soup))
 
     # filter empty qutoe blocks
     return chain.from_iterable(parseScene(st) for st in scene_texts if st.strip())

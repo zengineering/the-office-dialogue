@@ -9,7 +9,7 @@ from threading import Thread
 from sys import stderr
 from database import Database, OfficeQuote
 from dataclasses import Episode
-from parse import extractMatchingUrls, parseEpisodePage
+from parse import extractMatchingUrls, parseEpisode
 
 
 req_headers = {"User-Agent":
@@ -60,7 +60,7 @@ def episodeFactory(eps_url, eps_url_pattern, index_url):
         url = urljoin(index_url, eps_url)
         content = fetchContent(url)
         if content:
-            quotes = parseEpisodePage(content)
+            quotes = parseEpisode(content)
             return Episode(episode, season, quotes)
         else:
             return None
