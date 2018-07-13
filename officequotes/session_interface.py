@@ -2,14 +2,14 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from os.path import realpath
 from contextlib import contextmanager
-from tables import Base, Character, DialogueLine, OfficeQuote
+from tables import Base
 
 
 Session = sessionmaker()
 
 
-class Database():
-    def __init__(self, db_file=""):
+class SessionInterface():
+    def __init__(self, db_file="db.sqlite"):
         # create engine
         self.engine = create_engine("sqlite:///{}".format(realpath(db_file)), echo=False)
 
@@ -57,20 +57,3 @@ class Database():
                 instance = model(**kwargs)
                 session.add(instance)
                 return instance
-
-
-    def addEpisode(self, episode):
-        """
-        Convert each quote in an episode into the database schema class
-            and write them to the database.
-        """
-        for quote in episode.quotes:
-            db_quote = OfficeQuote(
-                season=episode.season,
-                episode=episode.number,
-                deleted=scene.deleted)
-            db_quote.speaker = self.getOrCreate(session, Character, name=quote.speaker)
-            db_quote.line = DialogueLine(content=quote.line)
-
-            self.add(quote)
-
