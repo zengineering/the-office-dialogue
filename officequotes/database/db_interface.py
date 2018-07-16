@@ -1,32 +1,38 @@
-from session_interface import SessionInterface
-from tables import Character, DialogueLine, OfficeQuote
+from .session_interface import sessionScope, db_add, db_getOrCreate
+from .tables import Character, DialogueLine, OfficeQuote
 
 
-class DbInterface():
-    def __init__(self, db_file="db.sqlite"):
-        self.session_interface = SessionInterface(db_file)
+def addEpisode(episode):
+    """
+    Convert each quote in an episode into the database schema class
+        and write them to the database.
+    """
+    for quote in episode.quotes:
+        db_quote = OfficeQuote(
+            season=episode.season,
+            episode=episode.number,
+            deleted=quote.deleted)
+        db_quote.speaker = db_getOrCreate(Character, name=quote.speaker)
+        db_quote.line = DialogueLine(content=quote.line)
+
+        db_add(quote)
 
 
-    def addEpisode(self, episode):
-        """
-        Convert each quote in an episode into the database schema class
-            and write them to the database.
-        """
-        for quote in episode.quotes:
-            db_quote = OfficeQuote(
-                season=episode.season,
-                episode=episode.number,
-                deleted=scene.deleted)
-            db_quote.speaker = self.getOrCreate(Character, name=quote.speaker)
-            db_quote.line = DialogueLine(content=quote.line)
+def getCharacterById(char_id):
+    with sessionScope() as session:
+        q = session.query(Character).filter(Character.id==char_id).first()
+    return q
 
-            self.session_interface.add(quote)
 
-    def getCharacterById(self, char_id):
-        with self.session_interface.session_scope() as session:
-            session.query(Character).filter(Character.id==char_id)
+def getCharacterByName(char_name):
+    with sessionScope() as session:
+        q = session.query(Character).filter(Character.name==char_name).all()
+    return q
 
-    def getCharacterByName(self, char_name):
-        with self.session_interface.session_scope() as session:
-            session.query(Character).filter(Character.name==char_name)
-
+    #def getCharacterByAttr(attr_name):
+    #    try:
+    #        attr = getattr(Chracter, attr_name)
+    #        with sessionScope() as session:
+    #            session.query(Character).filter(Character.name==char_name)
+    #    except AttributeError:
+    #        return None
