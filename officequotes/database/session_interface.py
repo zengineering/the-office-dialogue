@@ -1,6 +1,5 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
-from os.path import realpath
 from contextlib import contextmanager
 from .tables import Base
 
@@ -8,21 +7,24 @@ from .tables import Base
 Session = scoped_session(sessionmaker())
 
 class EngineConfig():
-    db_path = "officequotes.sqlite"
+    db_url = "officequotes.sqlite"
 
     @classmethod
-    def setupEngine(cls, new_db_path):
-        if new_db_path != cls.db_path:
+    def setupEngine(cls, new_db_url):
+        if new_db_url != cls.db_url:
             # create engine
-            engine = create_engine("sqlite:///{}".format(realpath(new_db_path)), echo=False)
+            engine = create_engine(new_db_url, echo=False)
 
             # create schema
             Base.metadata.create_all(engine)
 
+            # remove current session
+            Session.remove()
+
             # connect session
             Session.configure(bind=engine)
 
-            cls.db_path = new_db_path
+            cls.db_url = new_db_url
 
 setupDbEngine = EngineConfig.setupEngine
 

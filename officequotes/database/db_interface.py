@@ -2,20 +2,15 @@ from .session_interface import contextSession, db_add, db_getOrCreate
 from .tables import Character, DialogueLine, OfficeQuote
 
 
-def addEpisode(episode):
-    """
-    Convert each quote in an episode into the database schema class
-        and write them to the database.
-    """
-    for quote in episode.quotes:
-        db_quote = OfficeQuote(
-            season=episode.season,
-            episode=episode.number,
-            deleted=quote.deleted)
-        db_quote.speaker = db_getOrCreate(Character, name=quote.speaker)
-        db_quote.line = DialogueLine(content=quote.line)
-
-        db_add(quote)
+def addQuote(season, episode, deleted, speaker, line):
+    quote = OfficeQuote(
+        season=season,
+        episode=episode,
+        deleted=deleted
+    )
+    quote.speaker = db_getOrCreate(Character, name=speaker)
+    quote.line = DialogueLine(content=line)
+    db_add(quote)
 
 
 def getCharacter(**kwargs):

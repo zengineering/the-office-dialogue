@@ -7,10 +7,14 @@ from urllib.parse import urljoin
 from queue import Queue
 from threading import Thread
 from sys import stderr
-from database import setupDbEngine, addEpisode
+from os.path import realpath
+
+from database import setupDbEngine
 from dataclasses import Episode
 from parse import extractMatchingUrls, parseEpisode
 
+def addEpisode(*args):
+    pass
 
 req_headers = {"User-Agent":
     ("Mozilla/5.0 (X11; CrOS x86_64 10032.86.0) "
@@ -108,7 +112,7 @@ def download(thread_count, db_file):
     url_q = Queue()
     episode_q = Queue()
     failed_q = Queue()
-    setupDbEngine(db_file)
+    setupDbEngine("sqlite:///{}".format(realpath(db_file)))
 
     # queue up all episodes
     for url in eps_urls:
