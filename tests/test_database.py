@@ -14,20 +14,7 @@ def db(scope='module'):
         yield
 
 
-@pytest.fixture
-def make_quote():
-    def _make_quote(season, episode, deleted, speaker, line):
-        return OfficeQuote(
-            season=season,
-            episode=episode,
-            deleted=deleted,
-            speaker=Character(name=speaker),
-            line=DialogueLine(content=line)
-        )
-    return _make_quote
-
-
-def test_db_addQuote(db, make_quote):
+def test_db_addQuote(db):
     season, episode, deleted, speaker, line = 1, 1, False, "Speaker", "Line content"
     addQuote(season, episode, deleted, speaker, line)
 
@@ -46,21 +33,32 @@ def test_db_addQuote(db, make_quote):
         assert quote_q[0].deleted == deleted
 
 
-def test_db_existingSpeaker(db, make_quote):
+def test_db_existingSpeaker(db):
     season, episode, deleted, speaker, line = 1, 1, False, "Speaker", "Line content"
     for i in range(2):
         addQuote(season+i, episode+i, deleted, speaker, line)
 
     with contextSession() as session:
         char_q = session.query(Character).filter(Character.name==speaker).all()
-        line_q = session.query(DialogueLine).filter(DialogueLine.content==line).all()
-        quote_q = session.query(OfficeQuote).filter(
-            OfficeQuote.season==season, OfficeQuote.episode==episode).all()
-
-        assert len(line_q) == 2
         assert len(char_q) == 1
         assert len(char_q[0].quotes) == 2
 
+        for char_id, in session.query(OfficeQuote.speaker_id).all():
+            assert char_id == char_q[0].id
 
-def test_db_addEpisode(db):
-    pass
+
+#def test_db_addMultiple(db):
+#    season, episode, deleted, speaker, line = 5, 13, False, "Speaker", "Line content"
+#    for i in range(2):
+#        addQuote(season+i, episode+i, deleted, speaker, line)
+#
+#    with contextSession() as session:
+#        char_q = session.query(Character).filter(Character.name==speaker).all()
+#        assert len(char_q) == 1
+#        assert len(char_q[0].quotes) == 2
+#        line_q = session.query(DialogueLine).filter(DialogueLine.content==line).all()
+#        assert len(line_q) == 2
+#
+#        quote_q = session.query(OfficeQuote).all()
+#        assert len(quote_q) == 2
+#
