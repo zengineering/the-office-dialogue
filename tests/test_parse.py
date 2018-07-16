@@ -50,13 +50,13 @@ def indexHtml():
     return content
 
 
-def test_withoutDoctypes(testSoup):
+def test_parse_withoutDoctypes(testSoup):
     assert any(map(lambda t: isinstance(t, Doctype), testSoup))
     filtered_soup = withoutDoctypes(testSoup)
     assert not any(map(lambda t: isinstance(t, Doctype), filtered_soup))
 
 
-def test_removeTags(testSoup):
+def test_parse_removeTags(testSoup):
     removeTags(testSoup)
     for tag in 'biu':
         assert not testSoup(tag)
@@ -64,12 +64,12 @@ def test_removeTags(testSoup):
     assert not testSoup.findAll("div", {"class": "spacer"})
 
 
-def test_quote_extraction(episodeSoup):
+def test_parse_quote_extraction(episodeSoup):
     for tag in withoutDoctypes(episodeSoup):
         assert tag['class'] == ['quote']
 
 
-def test_parseScene(episodeSoup):
+def test_parse_parseScene(episodeSoup):
     scene_text = next(quote_div.text for quote_div in withoutDoctypes(episodeSoup))
     quotes = parseScene(scene_text)
 
@@ -79,7 +79,7 @@ def test_parseScene(episodeSoup):
     assert quotes[0].deleted == False
 
 
-def test_parseEpisode(episodeHtml):
+def test_parse_parseEpisode(episodeHtml):
     quotes = parseEpisode(episodeHtml)
 
     first = quotes[0]
@@ -93,7 +93,7 @@ def test_parseEpisode(episodeHtml):
     assert last.deleted == False
 
 
-def test_extractMatchingUrls(indexHtml):
+def test_parse_extractMatchingUrls(indexHtml):
     '''
     Extract an iterable of URLs matching the given pattern
     '''
