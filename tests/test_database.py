@@ -53,7 +53,7 @@ def test_db_existingSpeaker(db, quote):
         assert session.query(OfficeQuote).filter(OfficeQuote.speaker_id==char.id).count() == 2
 
 
-def test_db_addMultiple(db, quote):
+def test_db_addEpisode(db, quote):
     count = 1024
     for i in range(count):
         addQuote(quote.season, quote.episode, quote.deleted,
