@@ -27,16 +27,3 @@ def getCharacter(**kwargs):
             session.expunge_all()
         return q
 
-
-def getCharacterByName(char_name):
-    with contextSession() as session:
-        q = session.query(Character).filter(Character.name==char_name).all()
-    return q
-
-    #def getCharacterByAttr(attr_name):
-    #    try:
-    #        attr = getattr(Chracter, attr_name)
-    #        with contextSession() as session:
-    #            session.query(Character).filter(Character.name==char_name)
-    #    except AttributeError:
-    #        return None

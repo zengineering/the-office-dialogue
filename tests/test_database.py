@@ -20,10 +20,9 @@ def session(db):
         yield session
 
 
-@pytest.mark.parametrize(('season', 'episode', 'deleted', 'speaker', 'line'),
-    (
-        (1, 1, False, "Speaker", "Line content"),
-    ),
+@pytest.mark.parametrize(
+    ('season', 'episode', 'deleted', 'speaker', 'line'),
+    ((1, 1, False, "Speaker", "Line content"),),
 )
 def test_addQuote(session, season, episode, deleted, speaker, line):
     quote = OfficeQuote(season=season, episode=episode, deleted=deleted)
@@ -34,13 +33,19 @@ def test_addQuote(session, season, episode, deleted, speaker, line):
     char_q = session.query(Character).filter(Character.name==speaker).all()
     line_q = session.query(DialogueLine).filter(DialogueLine.content==line).all()
     quote_q = session.query(OfficeQuote).filter(
-        OfficeQuote.season==season, OfficeQuote.episode==episode,
-        OfficeQuote.deleted==deleted).all()
+        OfficeQuote.season==season, OfficeQuote.episode==episode).all()
 
     assert len(char_q) == 1
     assert len(line_q) == 1
     assert len(quote_q) == 1
     assert quote_q[0].speaker.id == char_q[0].id
     assert quote_q[0].line.id == line_q[0].id
+    assert quote_q[0].deleted == deleted
 
 
+def test_existingSpeaker(session):
+    pass
+
+
+def test_addEpisode(session):
+    pass
