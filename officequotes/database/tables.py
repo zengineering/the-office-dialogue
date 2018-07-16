@@ -11,7 +11,7 @@ class Character(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(Text, nullable=False)
-    quote = relationship("OfficeQuote", back_populates="speaker")
+    quotes = relationship("OfficeQuote", back_populates="speaker")
 
     def __repr__(self):
         return "<Character(name={})>".format(self.name)
@@ -38,7 +38,7 @@ class OfficeQuote(Base):
     line_id = Column(Integer, ForeignKey('lines.id'))
     deleted = Column(Boolean)
 
-    speaker = relationship('Character', uselist=False, back_populates='quote')
+    speaker = relationship('Character', uselist=False, back_populates='quotes')
     line = relationship('DialogueLine', uselist=False, back_populates='quote')
 
     def __repr__(self):

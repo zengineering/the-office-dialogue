@@ -1,11 +1,10 @@
-from collections.abc import Iterable
 import attr
 
 @attr.s(frozen=True)
 class Episode():
     number = attr.ib(validator=attr.validators.instance_of(int))
     season = attr.ib(validator=attr.validators.instance_of(int))
-    quotes = attr.ib(validator=attr.validators.instance_of(Iterable))
+    quotes = attr.ib(validator=attr.validators.instance_of(list))
 
     def __str__(self):
         return "<Episode(S{}E{}: {} quotes)>".format(self.season, self.number, len(self.quotes))

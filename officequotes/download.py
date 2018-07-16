@@ -7,7 +7,7 @@ from urllib.parse import urljoin
 from queue import Queue
 from threading import Thread
 from sys import stderr
-from database import Database, OfficeQuote
+from database import setupDbEngine, addEpisode
 from dataclasses import Episode
 from parse import extractMatchingUrls, parseEpisode
 
@@ -21,7 +21,7 @@ index_url = "http://www.officequotes.net/index.php"
 eps_href_re = re.compile("no(\d)-(\d+).php")
 
 
-def writeToDatabase(db, queue, eps_count):
+def writeToDatabase(queue, eps_count):
     '''
     Write <eps_count> episodes in the queue to a database.
     '''
@@ -30,7 +30,7 @@ def writeToDatabase(db, queue, eps_count):
         try:
             episode = queue.get()
             if episode:
-                db.addEpisode(episode)
+                addEpisode(episode)
                 successful += 1
                 print("Stored {} episodes successfully;".format(successful), end=" ")
         except Exception as e:
@@ -108,7 +108,7 @@ def download(thread_count, db_file):
     url_q = Queue()
     episode_q = Queue()
     failed_q = Queue()
-    database = Database(db_file)
+    setupDbEngine(db_file)
 
     # queue up all episodes
     for url in eps_urls:
@@ -118,7 +118,7 @@ def download(thread_count, db_file):
     progress_thread = Thread(target=downloadProgress, args=(url_q,), name="progress")
 
     # consumer thread for writing each episode it receives in a queue to the database
-    db_thread = Thread(target=lambda: writeToDatabase(database, episode_q, url_q.qsize()), name="database")
+    db_thread = Thread(target=lambda: writeToDatabase(episode_q, url_q.qsize()), name="database")
 
     # producer threads for fetching and parsing episode pages
     thread_pool = [

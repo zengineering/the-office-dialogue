@@ -1,2 +1,3 @@
-from .session_interface import setupEngine, sessionScope, db_add, db_getOrCreate
-from .db_interface import addEpisode, getCharacterById, getCharacterByName
+from .session_interface import setupDbEngine, contextSession, db_add, db_getOrCreate
+from .db_interface import addEpisode, getCharacter
+from .tables import OfficeQuote, Character, DialogueLine

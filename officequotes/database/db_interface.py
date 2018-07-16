@@ -1,4 +1,4 @@
-from .session_interface import sessionScope, db_add, db_getOrCreate
+from .session_interface import contextSession, db_add, db_getOrCreate
 from .tables import Character, DialogueLine, OfficeQuote
 
 
@@ -18,21 +18,25 @@ def addEpisode(episode):
         db_add(quote)
 
 
-def getCharacterById(char_id):
-    with sessionScope() as session:
-        q = session.query(Character).filter(Character.id==char_id).first()
-    return q
+def getCharacter(**kwargs):
+    if not kwargs:
+        return None
+    else:
+        with contextSession() as session:
+            q = session.query(Character).filter_by(**kwargs).all()
+            session.expunge_all()
+        return q
 
 
 def getCharacterByName(char_name):
-    with sessionScope() as session:
+    with contextSession() as session:
         q = session.query(Character).filter(Character.name==char_name).all()
     return q
 
     #def getCharacterByAttr(attr_name):
     #    try:
     #        attr = getattr(Chracter, attr_name)
-    #        with sessionScope() as session:
+    #        with contextSession() as session:
     #            session.query(Character).filter(Character.name==char_name)
     #    except AttributeError:
     #        return None
