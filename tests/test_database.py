@@ -23,7 +23,6 @@ def quote():
 
 def test_db_addQuote(db, quote):
     addQuote(*quote)
-
     with contextSession() as session:
         assert session.query(Character).filter(Character.name==quote.speaker).count() == 1
         assert session.query(DialogueLine).filter(
@@ -32,6 +31,10 @@ def test_db_addQuote(db, quote):
             OfficeQuote.season==quote.season, OfficeQuote.episode==quote.episode
             ).count() == 1
 
+
+def test_db_relationship(db, quote):
+    addQuote(*quote)
+    with contextSession() as session:
         char = session.query(Character).filter(Character.name==quote.speaker).first()
         officequote = session.query(OfficeQuote).filter(
             OfficeQuote.season==quote.season, OfficeQuote.episode==quote.episode).first()
@@ -54,16 +57,16 @@ def test_db_existingSpeaker(db, quote):
 
 
 def test_db_addEpisode(db, quote):
-    count = 1024
-    for i in range(count):
+    quote_count = 1024
+    speaker_count = 100
+    for i in range(quote_count):
         addQuote(quote.season, quote.episode, quote.deleted,
-                 quote.speaker.format(i%100), quote.line.format(i))
+                 quote.speaker.format(i%speaker_count), quote.line.format(i))
 
     with contextSession() as session:
-        assert session.query(Character.id).count() == 100
-        assert len(list(session.query(Character.name).distinct())) == 100
-        assert session.query(DialogueLine.id).count() == count
-
+        assert session.query(Character.id).count() == speaker_count
+        assert len(list(session.query(Character.name).distinct())) == speaker_count
+        assert session.query(DialogueLine.id).count() == quote_count
         assert all(map(lambda s: s[0] == quote.season, session.query(OfficeQuote.season).all()))
         assert all(map(lambda e: e[0] == quote.episode, session.query(OfficeQuote.episode).all()))
 
