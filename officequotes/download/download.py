@@ -10,8 +10,8 @@ from sys import stderr
 from os.path import realpath
 
 from database import setupDbEngine
-from dataclasses import Episode
-from parse import extractMatchingUrls, parseEpisode
+from .dataclasses import Episode
+from .parse import extractMatchingUrls, parseEpisode
 
 def addEpisode(*args):
     pass

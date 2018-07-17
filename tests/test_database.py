@@ -5,8 +5,9 @@ from collections import namedtuple
 
 Quote = namedtuple("Quote", ('season', 'episode', 'deleted', 'speaker', 'line'))
 
-from context import database, dataclasses
+from context import database, download
 from database import *
+from download import *
 
 
 @pytest.fixture

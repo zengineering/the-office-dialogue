@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup, SoupStrainer, Doctype
-from dataclasses import Quote
 from itertools import chain
+from .dataclasses import Quote
 
 
 def withoutDoctypes(soup):

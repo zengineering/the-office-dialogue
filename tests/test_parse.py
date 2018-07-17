@@ -3,10 +3,10 @@ from bs4 import BeautifulSoup, Doctype, SoupStrainer
 from itertools import tee
 from pathlib import Path
 
-from context import test_path, parse, dataclasses
-from parse import withoutDoctypes, removeTags, parseScene, parseEpisode, extractMatchingUrls
-from dataclasses import Quote
-from download import eps_href_re
+from context import test_path
+from download.parse import withoutDoctypes, removeTags, parseScene, parseEpisode, extractMatchingUrls
+from download.dataclasses import Quote
+from download.download import eps_href_re
 
 @pytest.fixture
 def testSoup():
@@ -32,7 +32,7 @@ def testSoup():
 def episodeSoup():
     html = episodeHtml()
     soup = BeautifulSoup(html, "lxml", parse_only=SoupStrainer("div", {"class": "quote"}))
-    parse.removeTags(soup)
+    removeTags(soup)
     return soup
 
 
