@@ -3,6 +3,9 @@ from .tables import Character, DialogueLine, OfficeQuote
 
 
 def addQuote(season, episode, deleted, speaker, line):
+    '''
+    Add a quote to the database (with a new character if necessary).
+    '''
     quote = OfficeQuote(
         season=season,
         episode=episode,
@@ -14,6 +17,9 @@ def addQuote(season, episode, deleted, speaker, line):
 
 
 def getCharacter(**kwargs):
+    '''
+    Retrieve a Character from the database
+    '''
     if not kwargs:
         return None
     else:

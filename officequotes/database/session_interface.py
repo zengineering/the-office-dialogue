@@ -7,6 +7,9 @@ from .tables import Base
 Session = scoped_session(sessionmaker())
 
 class EngineConfig():
+    """
+    "Singleton" for inititiliazing/updating engine with new db url
+    """
     db_url = "officequotes.sqlite"
 
     @classmethod
@@ -31,7 +34,7 @@ setupDbEngine = EngineConfig.setupEngine
 @contextmanager
 def contextSession(*, commit=False):
     """
-    Provide a transactional scope around a series of operations.
+    Provide a transactional scope around a series of database operations
     """
     session = Session()
     if commit:

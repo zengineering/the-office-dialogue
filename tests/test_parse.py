@@ -10,6 +10,9 @@ from download.download import eps_href_re
 
 @pytest.fixture
 def testSoup():
+    '''
+    BeautifulSoup result of parsing test HTML with tags of interest
+    '''
     html = (
         '<!DOCTYPE html> <html> '
         '<head> <title>Page Title</title> </head> '
@@ -30,6 +33,9 @@ def testSoup():
 
 @pytest.fixture
 def episodeSoup():
+    '''
+    BeautifulSoup result of parsing http://officequotes.net/no5-13.php
+    '''
     html = episodeHtml()
     soup = BeautifulSoup(html, "lxml", parse_only=SoupStrainer("div", {"class": "quote"}))
     removeTags(soup)
@@ -38,6 +44,9 @@ def episodeSoup():
 
 @pytest.fixture
 def episodeHtml():
+    '''
+    Content of http://officequotes.net/no5-13.php
+    '''
     with open(Path(test_path)/'data/no5-13.php', 'rb') as f:
         content = f.read()
     return content
@@ -45,6 +54,9 @@ def episodeHtml():
 
 @pytest.fixture
 def indexHtml():
+    '''
+    Content of http://officequotes.net/index.php
+    '''
     with open(Path(test_path)/'data/index.php', 'rb') as f:
         content = f.read()
     return content
