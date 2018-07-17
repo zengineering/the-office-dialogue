@@ -6,8 +6,7 @@ from collections import namedtuple
 Quote = namedtuple("Quote", ('season', 'episode', 'deleted', 'speaker', 'line'))
 
 from context import database, download
-from database import *
-from download import *
+from database import contextSession, setupDbEngine, addQuote, Character, OfficeQuote, DialogueLine
 
 
 @pytest.fixture
@@ -71,3 +70,6 @@ def test_db_addEpisode(db, quote):
         assert all(map(lambda s: s[0] == quote.season, session.query(OfficeQuote.season).all()))
         assert all(map(lambda e: e[0] == quote.episode, session.query(OfficeQuote.episode).all()))
 
+
+def test_db_getCharacter(db):
+    pass
