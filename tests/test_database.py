@@ -3,7 +3,7 @@ from tempfile import NamedTemporaryFile
 from sqlalchemy import exists, func
 from collections import namedtuple
 
-Quote = namedtuple("Quote", ('season', 'episode', 'deleted', 'speaker', 'line'))
+Quote = namedtuple("Quote", ('season', 'episode', 'speaker', 'line', 'deleted'))
 
 from context import database, download
 from database import contextSession, setupDbEngine, addQuote, Character, OfficeQuote, DialogueLine
@@ -18,7 +18,7 @@ def db(scope='module'):
 
 @pytest.fixture
 def quote():
-    return Quote(1, 1, False, "Speaker{}", "Line {}")
+    return Quote(1, 1, "Speaker{}", "Line {}", False)
 
 
 def test_db_addQuote(db, quote):
@@ -48,7 +48,7 @@ def test_db_relationship(db, quote):
 
 def test_db_existingSpeaker(db, quote):
     for i in range(2):
-        addQuote(quote.season+i, quote.episode+i, quote.deleted, quote.speaker, quote.line)
+        addQuote(quote.season+i, quote.episode+i, quote.speaker, quote.line, quote.deleted)
 
     with contextSession() as session:
         assert session.query(Character).filter(Character.name==quote.speaker).count() == 1
@@ -60,8 +60,8 @@ def test_db_addEpisode(db, quote):
     quote_count = 1024
     speaker_count = 100
     for i in range(quote_count):
-        addQuote(quote.season, quote.episode, quote.deleted,
-                 quote.speaker.format(i%speaker_count), quote.line.format(i))
+        addQuote(quote.season, quote.episode, quote.speaker.format(i % speaker_count),
+                 quote.line.format(i), quote.deleted)
 
     with contextSession() as session:
         assert session.query(Character.id).count() == speaker_count

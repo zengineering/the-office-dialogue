@@ -2,7 +2,7 @@ from .session_interface import contextSession, db_add, db_getOrCreate
 from .tables import Character, DialogueLine, OfficeQuote
 
 
-def addQuote(season, episode, deleted, speaker, line):
+def addQuote(season, episode, speaker, line, deleted):
     '''
     Add a quote to the database (with a new character if necessary).
     '''
