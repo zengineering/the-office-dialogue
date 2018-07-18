@@ -18,4 +18,5 @@ class Quote():
     def __str__(self):
         return "<Quote(speaker={}, line={}, deleted={})>".format(self.speaker, self.line, self.deleted)
 
-
+    def to_tuple(self):
+        attr.astuple(self)

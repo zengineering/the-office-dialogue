@@ -12,9 +12,8 @@ from os.path import realpath
 from database import setupDbEngine
 from .dataclasses import Episode
 from .parse import extractMatchingUrls, parseEpisode
-
-def addEpisode(*args):
-    pass
+from .fetch import fetchContent, fetchAndParse
+from .db_interface import writeToDatabase
 
 req_headers = {"User-Agent":
     ("Mozilla/5.0 (X11; CrOS x86_64 10032.86.0) "
@@ -23,71 +22,6 @@ req_headers = {"User-Agent":
 }
 index_url = "http://www.officequotes.net/index.php"
 eps_href_re = re.compile("no(\d)-(\d+).php")
-
-
-def writeToDatabase(queue, eps_count):
-    '''
-    Write <eps_count> episodes in the queue to a database.
-    '''
-    successful = 0
-    while eps_count > 0 or not queue.empty():
-        try:
-            episode = queue.get()
-            if episode:
-                addEpisode(episode)
-                successful += 1
-                print("Stored {} episodes successfully;".format(successful), end=" ")
-        except Exception as e:
-            print("writeToDatabase failed with:\n{}".format(e), file=stderr)
-        finally:
-            eps_count -= 1
-            print("{} episodes remaining".format(eps_count), end=" "*4 + "\r")
-
-    return successful
-
-
-def fetchContent(url):
-    '''
-    Request a url and return the contents.
-    '''
-    req = requests.get(url, headers=req_headers)
-    req.raise_for_status()
-    return req.text
-
-
-def episodeFactory(eps_url, eps_url_pattern, index_url):
-    '''
-    Fetch the content from an episode page and convert it to an Episode instance.
-    '''
-    try:
-        season, episode = map(int, re.fullmatch(eps_url_pattern, eps_url).groups())
-        url = urljoin(index_url, eps_url)
-        content = fetchContent(url)
-        if content:
-            quotes = parseEpisode(content)
-            return Episode(episode, season, quotes)
-        else:
-            return None
-    except requests.RequestException as e:
-        print("Request for {} failed:\n\t{}".format(eps_url, e), file=stderr)
-    except Exception as e:
-        print("Episode from url {} failed:\n\t{}".format(eps_url, e), file=stderr)
-
-
-def fetchAndParse(url_q, episode_q, failed_q, eps_href_re, index_url):
-    '''
-    Pop a url from the url queue
-    Download and parse the episode page at that url
-    Push the parsed result into the episode queue
-    If parsing or downloading fails, put it in the failed queue
-    '''
-    while not url_q.empty():
-        eps_url = url_q.get()
-        episode = episodeFactory(eps_url, eps_href_re, index_url)
-        episode_q.put(episode)
-        if episode is None:
-            failed_q.put(eps_url)
-
 
 def downloadProgress(url_q):
     '''
