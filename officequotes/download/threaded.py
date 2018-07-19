@@ -13,7 +13,6 @@ class StoppingThread(Thread):
     def stop(self):
         self._stop_event.set()
 
-    @property
     def stopped(self):
         return self._stop_event.is_set()
 

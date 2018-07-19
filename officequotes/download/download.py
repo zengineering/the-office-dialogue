@@ -57,6 +57,7 @@ def download(thread_count, db_file):
     # join the threads
     for t in thread_pool:
         t.join()
+    db_thread.stop()
     db_thread.join()
     progress_thread.join()
 
