@@ -1,11 +1,11 @@
 import pytest
-from threading import current_thread
+from threading import current_thread, Thread
 from time import sleep
 from queue import Queue
 
 from context import download
 from download.download import eps_href_re
-from download.threaded import writeEpisodeToDb, StoppingThread, fetchAndParse
+from download.threaded import writeEpisodeToDb, StoppingThread, fetchAndParse, writeToDatabase
 from download.dataclasses import Episode, Quote
 from database import contextSession, Character, DialogueLine, OfficeQuote
 
@@ -19,6 +19,14 @@ def episode():
         Quote("Michael", "Other things.", True)
     ])
 
+@pytest.fixture
+def episodes():
+    return (episode(),
+        Episode(6, 4, [
+            Quote("Dwight", "Toby.", False),
+            Quote("Toby", "What?", False)
+        ])
+    )
 
 def test_dlapp_writeEpisodeToDb(db, episode):
     writeEpisodeToDb(episode)
@@ -31,7 +39,7 @@ def test_dlapp_writeEpisodeToDb(db, episode):
 
 def test_dlapp_stoppingThread():
     def loop():
-        while not current_thread().stopped():
+        while not current_thread().stopped:
             pass
     t = StoppingThread(target=loop)
     t.start()
@@ -50,7 +58,7 @@ def test_dlapp_fetchAndParse():
         url_q.put("no{}.php".format(url))
 
     # producer threads for fetching and parsing episode pages
-    t = StoppingThread(target=fetchAndParse, args=(url_q, eps_q, fail_q, eps_href_re, index_url))
+    t = Thread(target=fetchAndParse, args=(url_q, eps_q, fail_q, eps_href_re, index_url))
     t.start()
     t.join()
     assert url_q.empty()
@@ -64,3 +72,21 @@ def test_dlapp_fetchAndParse():
         assert len(episode.quotes) > 100
 
 
+def test_dlapp_writeToDatabase(db, episodes):
+    eps_q = Queue()
+
+    # consumer thread for writing each episode it receives in a queue to the database
+    t = StoppingThread(target=writeToDatabase, args=(eps_q, len(episodes)), name="db")
+    t.start()
+    eps_q.put(episodes[0])
+    eps_q.put(episodes[1])
+    while not eps_q.empty():
+        pass
+    t.stop()
+    t.join()
+
+    with contextSession() as session:
+        assert session.query(Character.id).count() == 3
+        assert session.query(DialogueLine.id).count() == 6
+        char_id = session.query(Character.id).filter(Character.name == "Dwight")
+        assert session.query(OfficeQuote.id).filter(OfficeQuote.speaker_id == char_id).count() == 3

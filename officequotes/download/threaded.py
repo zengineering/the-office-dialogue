@@ -1,6 +1,7 @@
 from threading import Thread, Event, current_thread
 from sys import stderr
 from urllib.parse import urljoin
+from queue import Empty
 
 from database import addQuote
 from .fetch import episodeFactory
@@ -13,6 +14,7 @@ class StoppingThread(Thread):
     def stop(self):
         self._stop_event.set()
 
+    @property
     def stopped(self):
         return self._stop_event.is_set()
 
@@ -46,14 +48,17 @@ def writeToDatabase(queue, eps_count):
     successful = 0
     while not current_thread().stopped:
         try:
-            episode = queue.get()
+            episode = queue.get_nowait()
             if episode:
                 writeEpisodeToDb(episode)
                 successful += 1
                 print("Stored {} episodes successfully;".format(successful), end=" ")
+        except Empty:
+            pass
         except Exception as e:
             print("writeToDatabase failed with:\n{}".format(e), file=stderr)
         finally:
+            eps_count -= 1
             print("{} episodes remaining".format(eps_count), end=" "*4 + "\r")
 
     return successful
