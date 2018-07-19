@@ -32,7 +32,6 @@ def episodeFactory(eps_url, eps_url_pattern):
             eps = Episode(episode, season, quotes)
     except requests.RequestException as e:
         print("Request for {} failed:\n\t{}".format(eps_url, e), file=stderr)
-
     finally:
         return eps
 
