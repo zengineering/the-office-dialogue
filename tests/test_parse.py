@@ -105,6 +105,11 @@ def test_parse_parseEpisode(episodeHtml):
     assert last.deleted == False
 
 
+def test_parse_badEpisodeHtml(episodeHtml):
+    quotes = parseEpisode(episodeHtml[200:800])
+    assert not quotes
+
+
 def test_parse_extractMatchingUrls(indexHtml):
     '''
     Extract an iterable of URLs matching the given pattern
