@@ -24,7 +24,7 @@ def getCharacter(**kwargs):
         return None
     else:
         with contextSession() as session:
-            q = session.query(Character).filter_by(**kwargs).all()
+            q = session.query(Character).filter_by(**kwargs).one()
             session.expunge_all()
         return q
 

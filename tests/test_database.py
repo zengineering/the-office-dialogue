@@ -6,11 +6,12 @@ from collections import namedtuple
 Quote = namedtuple("Quote", ('season', 'episode', 'speaker', 'line', 'deleted'))
 
 from context import database, download
-from database import contextSession, setupDbEngine, addQuote, Character, OfficeQuote, DialogueLine
+from database import (contextSession, setupDbEngine, addQuote, getCharacter,
+                      Character, OfficeQuote, DialogueLine)
 
 
 @pytest.fixture
-def db(scope='module'):
+def db():
     with NamedTemporaryFile() as f:
         setupDbEngine("sqlite:///{}".format(f.name))
         yield
@@ -71,5 +72,7 @@ def test_db_addEpisode(db, quote):
         assert all(map(lambda e: e[0] == quote.episode, session.query(OfficeQuote.episode).all()))
 
 
-def test_db_getCharacter(db):
-    pass
+def test_db_getCharacter(db, quote):
+    addQuote(*quote)
+    assert getCharacter(name=quote.speaker) is not None
+
