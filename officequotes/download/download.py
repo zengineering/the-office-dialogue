@@ -9,28 +9,13 @@ from threading import Thread
 from sys import stderr
 from os.path import realpath
 
-from database import setupDbEngine
-from .dataclasses import Episode
-from .parse import extractMatchingUrls, parseEpisode
-from .fetch import fetchContent, fetchAndParse
-from .db_interface import writeToDatabase
+from .fetch import fetchContent
+from .parse import extractMatchingUrls
+from .threaded import fetchAndParse, writeToDatabase, downloadProgress
 
-req_headers = {"User-Agent":
-    ("Mozilla/5.0 (X11; CrOS x86_64 10032.86.0) "
-     "AppleWebKit/537.36 (KHTML, like Gecko) "
-     "Chrome/63.0.3239.140 Safari/537.36")
-}
+
 index_url = "http://www.officequotes.net/index.php"
 eps_href_re = re.compile("no(\d)-(\d+).php")
-
-def downloadProgress(url_q):
-    '''
-    Show the progress of episode downloads
-    '''
-    total_episodes = url_q.qsize()
-    while not url_q.empty():
-        print("Downloaded {} episodes successfully; {} episodes remaining".format(
-            total_episodes - url_q.qsize(), url_q.qsize()), end="\r")
 
 
 @click.command()
