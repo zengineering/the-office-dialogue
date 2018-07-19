@@ -1,6 +1,6 @@
 from threading import Thread, Event, current_thread
 from sys import stderr
-from urllib import urljoin
+from urllib.parse import urljoin
 
 from database import addQuote
 from .fetch import episodeFactory
