@@ -1,5 +1,4 @@
 import pytest
-from tempfile import NamedTemporaryFile
 from sqlalchemy import exists, func
 from collections import namedtuple
 
@@ -8,13 +7,6 @@ Quote = namedtuple("Quote", ('season', 'episode', 'speaker', 'line', 'deleted'))
 from context import database, download
 from database import (contextSession, setupDbEngine, addQuote, getCharacter,
                       Character, OfficeQuote, DialogueLine)
-
-
-@pytest.fixture
-def db():
-    with NamedTemporaryFile() as f:
-        setupDbEngine("sqlite:///{}".format(f.name))
-        yield
 
 
 @pytest.fixture
