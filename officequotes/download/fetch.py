@@ -1,5 +1,5 @@
 import requests
-from urllib.parse import urljoin
+import re
 from sys import stderr
 from .parse import parseEpisode
 from .dataclasses import Episode
@@ -23,13 +23,16 @@ def episodeFactory(eps_url, eps_url_pattern):
     '''
     Fetch the content from an episode page and convert it to an Episode instance.
     '''
+    eps = None
     try:
         season, episode = map(int, re.search(eps_url_pattern, eps_url).groups())
-        content = fetchContent(url)
+        content = fetchContent(eps_url)
         if content:
             quotes = parseEpisode(content)
-            return Episode(episode, season, quotes)
+            eps = Episode(episode, season, quotes)
     except requests.RequestException as e:
         print("Request for {} failed:\n\t{}".format(eps_url, e), file=stderr)
 
+    finally:
+        return eps
 

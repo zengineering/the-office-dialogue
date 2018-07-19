@@ -1,22 +1,26 @@
-from threading import Thread, Event
+from threading import Thread, Event, current_thread
+from sys import stderr
+from urllib import urljoin
 
-from database import setupDbEngine, addQuote
+from database import addQuote
+from .fetch import episodeFactory
 
 class StoppingThread(Thread):
     def __init__(self, *args, **kwargs):
-        super.__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self._stop_event = Event()
 
     def stop(self):
         self._stop_event.set()
 
+    @property
     def stopped(self):
         return self._stop_event.is_set()
 
 
 def writeEpisodeToDb(episode):
     for quote in episode.quotes:
-       addQuote(episode.season, episode.number, *quote.to_tuple())
+        addQuote(episode.season, episode.number, *quote.to_tuple())
 
 
 def fetchAndParse(url_q, episode_q, failed_q, eps_href_re, index_url):
@@ -33,13 +37,15 @@ def fetchAndParse(url_q, episode_q, failed_q, eps_href_re, index_url):
         if episode is None:
             failed_q.put(eps_url)
 
+    while not failed_q.empty():
+        episode_q.put(episodeFactory(urljoin(index_url, eps_url), eps_href_re))
 
 def writeToDatabase(queue, eps_count):
     '''
-    Write <eps_count> episodes in the queue to a database.
+    Write episodes in the queue to a database until the thread is stopped
     '''
     successful = 0
-    while eps_count > 0 or not queue.empty():
+    while not current_thread().stopped:
         try:
             episode = queue.get()
             if episode:
@@ -49,7 +55,6 @@ def writeToDatabase(queue, eps_count):
         except Exception as e:
             print("writeToDatabase failed with:\n{}".format(e), file=stderr)
         finally:
-            eps_count -= 1
             print("{} episodes remaining".format(eps_count), end=" "*4 + "\r")
 
     return successful

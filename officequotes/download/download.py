@@ -1,17 +1,14 @@
 #!/usr/bin/env python3
 
-import requests
 import re
 import click
-from urllib.parse import urljoin
 from queue import Queue
-from threading import Thread
-from sys import stderr
 from os.path import realpath
 
 from .fetch import fetchContent
 from .parse import extractMatchingUrls
-from .threaded import fetchAndParse, writeToDatabase, downloadProgress
+from .threaded import StoppingThread, fetchAndParse, writeToDatabase, downloadProgress
+from database import setupDbEngine
 
 
 index_url = "http://www.officequotes.net/index.php"
@@ -38,14 +35,16 @@ def download(thread_count, db_file):
         url_q.put(url)
 
     # thread to show download progress
-    progress_thread = Thread(target=downloadProgress, args=(url_q,), name="progress")
+    progress_thread = StoppingThread(target=downloadProgress, args=(url_q,), name="progress")
 
     # consumer thread for writing each episode it receives in a queue to the database
-    db_thread = Thread(target=lambda: writeToDatabase(episode_q, url_q.qsize()), name="database")
+    db_thread = StoppingThread(target=lambda: writeToDatabase(episode_q, url_q.qsize()),
+                               name="database")
 
     # producer threads for fetching and parsing episode pages
     thread_pool = [
-        Thread(target=fetchAndParse, args=(url_q, episode_q, failed_q, eps_href_re, index_url))
+        StoppingThread(target=fetchAndParse,
+                       args=(url_q, episode_q, failed_q, eps_href_re, index_url))
         for _ in range(thread_count)
     ]
 
