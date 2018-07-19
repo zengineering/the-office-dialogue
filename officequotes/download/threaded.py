@@ -55,8 +55,6 @@ def writeToDatabase(queue, eps_count):
                 print("Stored {} episodes successfully;".format(successful), end=" ")
         except Empty:
             pass
-        except Exception as e:
-            print("writeToDatabase failed with:\n{}".format(e), file=stderr)
         finally:
             eps_count -= 1
             print("{} episodes remaining".format(eps_count), end=" "*4 + "\r")
