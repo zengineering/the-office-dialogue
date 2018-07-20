@@ -40,16 +40,13 @@ def writeToDatabase(queue, commit_each=True):
     '''
     Write episodes in the queue to a database until the current thread is stopped
     '''
-    return (
-        writeToDatabaseQuoteCommit(queue) if commit_each else writeToDatabaseEpisodeCommit(queue)
-    )
+    writeToDatabaseQuoteCommit(queue) if commit_each else writeToDatabaseEpisodeCommit(queue)
 
 
 def writeToDatabaseEpisodeCommit(queue):
     '''
     Store all quotes for an episode using a single database commit
     '''
-    successful = 0
     while not current_thread().stopped:
         if not queue.empty():
             episode = queue.get_nowait()
@@ -57,8 +54,6 @@ def writeToDatabaseEpisodeCommit(queue):
                 with contextSession() as session:
                     for quote in episodeQuotes(episode):
                         session.add(quote)
-                        successful += 1
-    return successful
 
 
 def episodeQuotes(episode):
@@ -73,14 +68,11 @@ def writeToDatabaseQuoteCommit(queue):
     '''
     Store all quotes for an episode using individual database commits
     '''
-    successful = 0
     while not current_thread().stopped:
         if not queue.empty():
             episode = queue.get_nowait()
             if episode:
                 writeEpisodeToDb(episode)
-                successful += 1
-    return successful
 
 
 def writeEpisodeToDb(episode):
