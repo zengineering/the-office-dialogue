@@ -9,14 +9,17 @@ from .fetch import fetchContent
 from .parse import extractMatchingUrls
 from .threaded import StoppingThread, fetchAndParse, writeToDatabase, downloadProgress
 from .constants import index_url, eps_href_re
-from database import setupDbEngine
+from ..database import setupDbEngine
 
-
-@click.command()
+CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
+@click.command(context_settings=CONTEXT_SETTINGS)
 @click.option('--thread_count', '-t', default=16, help="Number of downloading threads.")
 @click.option('--db_file', default="officequotes.sqlite",
               help="SQLite database to write results to.")
 def download(thread_count, db_file):
+    '''
+    Download all quotes from all episodes of The Office and store in a database.
+    '''
 
     # get the index page and all episode urls
     index_content = fetchContent(index_url)

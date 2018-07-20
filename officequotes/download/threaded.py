@@ -3,7 +3,7 @@ from sys import stderr
 from urllib.parse import urljoin
 from queue import Empty
 
-from database import addQuote
+from ..database import addQuote
 from .fetch import episodeFactory
 
 class StoppingThread(Thread):
