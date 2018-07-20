@@ -3,11 +3,11 @@ from threading import current_thread, Thread
 from time import sleep
 from queue import Queue
 
-from context import download
-from download.constants import eps_href_re
-from download.threaded import writeEpisodeToDb, StoppingThread, fetchAndParse, writeToDatabase
-from download.dataclasses import Episode, Quote
-from database import contextSession, Character, DialogueLine, OfficeQuote
+from officequotes.download.constants import eps_href_re
+from officequotes.download.threaded import (
+    writeEpisodeToDb, StoppingThread, fetchAndParse, writeToDatabase)
+from officequotes.download.dataclasses import Episode, Quote
+from officequotes.database import contextSession, Character, DialogueLine, OfficeQuote
 
 
 @pytest.fixture
@@ -76,7 +76,7 @@ def test_dlapp_writeToDatabase(db, episodes):
     eps_q = Queue()
 
     # consumer thread for writing each episode it receives in a queue to the database
-    t = StoppingThread(target=writeToDatabase, args=(eps_q, len(episodes)), name="db")
+    t = StoppingThread(target=writeToDatabase, args=(eps_q,), name="db")
     t.start()
     eps_q.put(episodes[0])
     eps_q.put(episodes[1])

@@ -4,9 +4,8 @@ from collections import namedtuple
 
 Quote = namedtuple("Quote", ('season', 'episode', 'speaker', 'line', 'deleted'))
 
-from context import database, download
-from database import (contextSession, setupDbEngine, addQuote, getCharacter,
-                      Character, OfficeQuote, DialogueLine)
+from officequotes.database import (contextSession, setupDbEngine, addQuote, getCharacter,
+                                   Character, OfficeQuote, DialogueLine)
 
 
 @pytest.fixture

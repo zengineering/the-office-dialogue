@@ -1,25 +1,28 @@
 #!/usr/bin/env python3
 
-import re
 import click
 from queue import Queue
-from os.path import realpath
+from os.path import realpath, isfile
+from os import rename
 
 from .fetch import fetchContent
 from .parse import extractMatchingUrls
-from .threaded import StoppingThread, fetchAndParse, writeToDatabase, downloadProgress
+from .threaded import StoppingThread, fetchAndParse, writeToDatabase, progress
 from .constants import index_url, eps_href_re
-from ..database import setupDbEngine
+from officequotes.database import setupDbEngine
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 @click.command(context_settings=CONTEXT_SETTINGS)
-@click.option('--thread_count', '-t', default=16, help="Number of downloading threads.")
+@click.option('--thread_count', '-t', default=8, help="Number of downloading threads.")
 @click.option('--db_file', default="officequotes.sqlite",
               help="SQLite database to write results to.")
 def download(thread_count, db_file):
     '''
     Download all quotes from all episodes of The Office and store in a database.
     '''
+
+    if isfile(db_file):
+        rename(db_file, db_file+".bak")
 
     # get the index page and all episode urls
     index_content = fetchContent(index_url)
@@ -35,13 +38,12 @@ def download(thread_count, db_file):
         url_q.put(url)
 
     # thread to show download progress
-    progress_thread = StoppingThread(target=downloadProgress, args=(url_q,), name="progress")
+    progress_thread = StoppingThread(target=progress, args=(url_q, episode_q), name="progress")
 
     # consumer thread for writing each episode it receives in a queue to the database
     #db_thread = StoppingThread(target=lambda: writeToDatabase(episode_q, url_q.qsize()),
     #                           name="database")
-    db_thread = StoppingThread(target=writeToDatabase, args=(episode_q, url_q.qsize()),
-                               name="database")
+    db_thread = StoppingThread(target=writeToDatabase, args=(episode_q,), name="database")
     # producer threads for fetching and parsing episode pages
     thread_pool = [
         StoppingThread(target=fetchAndParse,
@@ -58,9 +60,13 @@ def download(thread_count, db_file):
     # join the threads
     for t in thread_pool:
         t.join()
+
+    progress_thread.join()
+
+    while not episode_q.empty():
+        pass
     db_thread.stop()
     db_thread.join()
-    progress_thread.join()
 
     if not failed_q.empty():
         print("The following pages failed to download:")

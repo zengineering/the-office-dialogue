@@ -3,7 +3,7 @@ from sys import stderr
 from urllib.parse import urljoin
 from queue import Empty
 
-from ..database import addQuote
+from officequotes.database import addQuote
 from .fetch import episodeFactory
 
 class StoppingThread(Thread):
@@ -41,26 +41,21 @@ def fetchAndParse(url_q, episode_q, failed_q, eps_href_re, index_url):
     while not failed_q.empty():
         episode_q.put(episodeFactory(urljoin(index_url, eps_url), eps_href_re))
 
-def writeToDatabase(queue, eps_count):
+def writeToDatabase(queue):
     '''
     Write episodes in the queue to a database until the thread is stopped
     '''
     successful = 0
     while not current_thread().stopped:
-        try:
+        if not queue.empty():
             episode = queue.get_nowait()
             if episode:
                 writeEpisodeToDb(episode)
                 successful += 1
-                print("Storing {:>4}/{:>4}".format(successful, eps_count), end="\r")
-        except Empty:
-            pass
-
-    print()
     return successful
 
 
-def downloadProgress(url_q):
+def progress(url_q, episode_q):
     '''
     Show the progress of episode downloads
     '''
@@ -68,4 +63,9 @@ def downloadProgress(url_q):
     while not url_q.empty():
         print("Downloading {:>4}/{:>4}".format(total_episodes - url_q.qsize(), total_episodes),
               end="\r")
+    print()
 
+    while not episode_q.empty():
+        print("Storing {:>4}/{:>4}".format(total_episodes - episode_q.qsize(), total_episodes),
+              end="\r")
+    print()

@@ -1,8 +1,7 @@
 import pytest
 from tempfile import NamedTemporaryFile
 
-from context import database
-from database import setupDbEngine
+from officequotes.database import setupDbEngine
 
 @pytest.fixture
 def db():
