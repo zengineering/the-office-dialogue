@@ -16,6 +16,20 @@ def addQuote(season, episode, speaker, line, deleted):
     db_add(quote)
 
 
+def makeQuote(season, episode, speaker, line, deleted):
+    '''
+    Add a quote to the database (with a new character if necessary).
+    '''
+    quote = OfficeQuote(
+        season=season,
+        episode=episode,
+        deleted=deleted
+    )
+    quote.speaker = db_getOrCreate(Character, name=speaker)
+    quote.line = DialogueLine(content=line)
+    return quote
+
+
 def getCharacter(**kwargs):
     '''
     Retrieve a Character from the database
