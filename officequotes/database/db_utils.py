@@ -18,7 +18,7 @@ def addQuote(season, episode, speaker, line, deleted):
 
 def makeQuote(season, episode, speaker, line, deleted):
     '''
-    Add a quote to the database (with a new character if necessary).
+    Make a Quote
     '''
     quote = OfficeQuote(
         season=season,
