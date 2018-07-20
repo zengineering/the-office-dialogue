@@ -3,12 +3,7 @@ import re
 from sys import stderr
 from .parse import parseEpisode
 from .dataclasses import Episode
-
-req_headers = {"User-Agent":
-    ("Mozilla/5.0 (X11; CrOS x86_64 10032.86.0) "
-     "AppleWebKit/537.36 (KHTML, like Gecko) "
-     "Chrome/63.0.3239.140 Safari/537.36")
-}
+from .constants import req_headers
 
 def fetchContent(url):
     '''
@@ -30,8 +25,9 @@ def episodeFactory(eps_url, eps_url_pattern):
         if content:
             quotes = parseEpisode(content)
             eps = Episode(episode, season, quotes)
+    except AttributeError:
+        print("URL does not match expected format: {}".format(eps_url), file=stderr)
     except requests.RequestException as e:
         print("Request for {} failed:\n\t{}".format(eps_url, e), file=stderr)
-    finally:
-        return eps
+    return eps
 

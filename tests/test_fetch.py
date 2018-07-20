@@ -4,7 +4,7 @@ from tempfile import NamedTemporaryFile
 
 from context import download
 from download.fetch import fetchContent, episodeFactory
-from download.download import eps_href_re
+from download.constants import eps_href_re
 
 
 @pytest.fixture

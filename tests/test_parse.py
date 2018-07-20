@@ -4,9 +4,10 @@ from itertools import tee
 from pathlib import Path
 
 from context import test_path
-from download.parse import withoutDoctypes, removeTags, parseScene, parseEpisode, extractMatchingUrls
+from download.parse import (withoutDoctypes, removeTags, parseScene, parseEpisode,
+                            extractMatchingUrls)
 from download.dataclasses import Quote
-from download.download import eps_href_re
+from download.constants import eps_href_re
 
 @pytest.fixture
 def testSoup():

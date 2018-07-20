@@ -52,13 +52,11 @@ def writeToDatabase(queue, eps_count):
             if episode:
                 writeEpisodeToDb(episode)
                 successful += 1
-                print("Stored {} episodes successfully;".format(successful), end=" ")
+                print("Storing {:>4}/{:>4}".format(successful, eps_count), end="\r")
         except Empty:
             pass
-        finally:
-            eps_count -= 1
-            print("{} episodes remaining".format(eps_count), end=" "*4 + "\r")
 
+    print()
     return successful
 
 
@@ -68,6 +66,6 @@ def downloadProgress(url_q):
     '''
     total_episodes = url_q.qsize()
     while not url_q.empty():
-        print("Downloaded {} episodes successfully; {} episodes remaining".format(
-            total_episodes - url_q.qsize(), url_q.qsize()), end="\r")
+        print("Downloading {:>4}/{:>4}".format(total_episodes - url_q.qsize(), total_episodes),
+              end="\r")
 

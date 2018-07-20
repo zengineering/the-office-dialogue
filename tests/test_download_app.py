@@ -4,7 +4,7 @@ from time import sleep
 from queue import Queue
 
 from context import download
-from download.download import eps_href_re
+from download.constants import eps_href_re
 from download.threaded import writeEpisodeToDb, StoppingThread, fetchAndParse, writeToDatabase
 from download.dataclasses import Episode, Quote
 from database import contextSession, Character, DialogueLine, OfficeQuote

@@ -8,16 +8,13 @@ from os.path import realpath
 from .fetch import fetchContent
 from .parse import extractMatchingUrls
 from .threaded import StoppingThread, fetchAndParse, writeToDatabase, downloadProgress
+from .constants import index_url, eps_href_re
 from database import setupDbEngine
-
-
-index_url = "http://www.officequotes.net/index.php"
-eps_href_re = re.compile("no(\d)-(\d+).php")
 
 
 @click.command()
 @click.option('--thread_count', '-t', default=16, help="Number of downloading threads.")
-@click.option('--db_file', default="the-office-quotes.sqlite",
+@click.option('--db_file', default="officequotes.sqlite",
               help="SQLite database to write results to.")
 def download(thread_count, db_file):
 
@@ -38,9 +35,10 @@ def download(thread_count, db_file):
     progress_thread = StoppingThread(target=downloadProgress, args=(url_q,), name="progress")
 
     # consumer thread for writing each episode it receives in a queue to the database
-    db_thread = StoppingThread(target=lambda: writeToDatabase(episode_q, url_q.qsize()),
+    #db_thread = StoppingThread(target=lambda: writeToDatabase(episode_q, url_q.qsize()),
+    #                           name="database")
+    db_thread = StoppingThread(target=writeToDatabase, args=(episode_q, url_q.qsize()),
                                name="database")
-
     # producer threads for fetching and parsing episode pages
     thread_pool = [
         StoppingThread(target=fetchAndParse,
