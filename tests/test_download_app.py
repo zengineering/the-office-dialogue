@@ -72,11 +72,12 @@ def test_dlapp_fetchAndParse():
         assert len(episode.quotes) > 100
 
 
-def test_dlapp_writeToDatabase(db, episodes):
+@pytest.mark.parametrize(('commit_each'), ((True,), (False,)))
+def test_dlapp_writeToDatabase(db, episodes, commit_each):
     eps_q = Queue()
 
     # consumer thread for writing each episode it receives in a queue to the database
-    t = StoppingThread(target=writeToDatabase, args=(eps_q,), name="db")
+    t = StoppingThread(target=writeToDatabase, args=(eps_q, commit_each), name="db")
     t.start()
     eps_q.put(episodes[0])
     eps_q.put(episodes[1])
