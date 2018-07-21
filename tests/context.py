@@ -6,14 +6,10 @@ from pathlib import Path
 # Import package modules.
 # Assumes project structure:
 #
-# top/
+# project-top/
 #   officequotes/
-#       parse.py
-#       database.py
 #       ...
 #   tests/
-#       test_parse.py
-#       test_database.py
 #       ...
 
 test_path = Path(__file__).resolve().parent
