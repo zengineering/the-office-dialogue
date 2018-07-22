@@ -62,16 +62,14 @@ def writeEpisodeToDb(episode, last_line_id):
     '''
     Write all quotes in an episode to the database
     '''
-    return True
     conn = engineConnection()
 
-    return
     # write all dialogue lines to db; tracking last_id_number
     conn.execute(
         DialogueLine.__table__.insert(),
         [{"id": i+last_line_id, "content": quote.line} for i, quote in enumerate(episode.quotes)]
     )
-    return
+
     speaker_ids = []
     for quote in episode.quotes:
         speaker_id = conn.execute(
@@ -82,7 +80,7 @@ def writeEpisodeToDb(episode, last_line_id):
         else:
             speaker_ids.append(
                 conn.execute(Character.__table__.insert().values(name=quote.speaker)).lastrowid)
-    return
+
     conn.execute(
         OfficeQuote.__table__.insert(),
         [{'season': episode.season,
