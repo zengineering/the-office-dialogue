@@ -1,8 +1,11 @@
 from threading import Thread, Event, current_thread
 from sys import stderr
 from urllib.parse import urljoin
+from sqlalchemy.sql import select
+from sqlalchemy import func
 
-from officequotes.database import addQuote, makeQuote, contextSession
+from officequotes.database import (
+    addQuote, contextSession, DialogueLine, Character, OfficeQuote, engineConnection)
 from .fetch import episodeFactory
 
 class StoppingThread(Thread):
@@ -36,48 +39,53 @@ def fetchAndParse(url_q, episode_q, failed_q, eps_href_re, index_url):
         episode_q.put(episodeFactory(urljoin(index_url, eps_url), eps_href_re))
 
 
-def writeToDatabase(queue, commit_each=True):
-    '''
-    Write episodes in the queue to a database until the current thread is stopped
-    '''
-    writeToDatabaseQuoteCommit(queue) if commit_each else writeToDatabaseEpisodeCommit(queue)
 
-
-def writeToDatabaseEpisodeCommit(queue):
+def writeToDatabase(queue):
     '''
     Store all quotes for an episode using a single database commit
     '''
+    with contextSession() as session:
+        last_line_id = session.query(func.max(DialogueLine.id)).one_or_none()
+        if last_line_id is None:
+            last_line_id = 1
+
     while not current_thread().stopped:
         if not queue.empty():
             episode = queue.get_nowait()
             if episode:
-                with contextSession() as session:
-                    for quote in episodeQuotes(episode):
-                        session.add(quote)
+                writeEpisodeToDb(episode, last_line_id)
 
 
-def episodeQuotes(episode):
+def writeEpisodeToDb(episode, last_line_id):
     '''
-    Make a generator of database-model Quote's for an episode
+    Write all quotes in an episode to the database
     '''
-    return (makeQuote(episode.season, episode.number, *quote.to_tuple())
-            for quote in episode.quotes)
+    conn = engineConnection()
+    # write dialogue lines first
+    conn.execute(
+        DialogueLine.__table__.insert(),
+        [{"id": i+last_line_id, "content": quote.line} for i, quote in episode.quotes]
+    )
 
-
-def writeToDatabaseQuoteCommit(queue):
-    '''
-    Store all quotes for an episode using individual database commits
-    '''
-    while not current_thread().stopped:
-        if not queue.empty():
-            episode = queue.get_nowait()
-            if episode:
-                writeEpisodeToDb(episode)
-
-
-def writeEpisodeToDb(episode):
+    speaker_ids = []
     for quote in episode.quotes:
-        addQuote(episode.season, episode.number, *quote.to_tuple())
+        speaker_id = conn.execute(
+            select([Character.__table__.id]).where(Character.__table__.name == quote.speaker))
+        if speaker_id is not None:
+            speaker_ids.append(speaker_id)
+        else:
+            speaker_ids.append(
+                conn.execute(Character.__table__.insert().values(name=quote.speaker)).lastrowid)
+
+    conn.execute(
+        OfficeQuote.__table__.insert(),
+        [{'season': episode.season,
+          'episode': episode.number,
+          'deleted': quote.deleted,
+          'speaker_id': speaker_ids[i],
+          'line_id': i+last_line_id
+         } for i, quote in enumerate(episode.quotes)]
+    )
 
 
 def progress(url_q, episode_q):
