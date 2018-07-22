@@ -17,16 +17,17 @@ class EngineConfig():
     def setupEngine(cls, new_db_url):
         if new_db_url != cls.db_url:
             # create engine
-            self.engine = create_engine(new_db_url, echo=False)
+            cls.engine = create_engine(new_db_url, echo=False)
 
             # create schema
-            Base.metadata.create_all(self.engine)
+            #Base.metadata.drop_all(engine)
+            Base.metadata.create_all(cls.engine)
 
             # remove current session
             Session.remove()
 
             # connect session
-            Session.configure(bind=self.engine)
+            Session.configure(bind=cls.engine)
 
             cls.db_url = new_db_url
 
