@@ -11,25 +11,27 @@ class EngineConfig():
     "Singleton" for inititiliazing/updating engine with new db url
     """
     db_url = "officequotes.sqlite"
+    engine = None
 
     @classmethod
     def setupEngine(cls, new_db_url):
         if new_db_url != cls.db_url:
             # create engine
-            engine = create_engine(new_db_url, echo=False)
+            self.engine = create_engine(new_db_url, echo=False)
 
             # create schema
-            Base.metadata.create_all(engine)
+            Base.metadata.create_all(self.engine)
 
             # remove current session
             Session.remove()
 
             # connect session
-            Session.configure(bind=engine)
+            Session.configure(bind=self.engine)
 
             cls.db_url = new_db_url
 
 setupDbEngine = EngineConfig.setupEngine
+engineConnection = lambda: EngineConfig.engine.connect()
 
 @contextmanager
 def contextSession(*, commit=False):
