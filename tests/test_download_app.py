@@ -1,6 +1,6 @@
 import pytest
 from threading import current_thread, Thread
-from time import sleep
+from time import sleep, time
 from queue import Queue
 
 from officequotes.download.constants import eps_href_re

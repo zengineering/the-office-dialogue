@@ -46,7 +46,7 @@ def writeToDatabase(queue):
     '''
     last_line_id = 1
     with contextSession() as session:
-        q = session.query(func.max(DialogueLine.id)).one_or_none()
+        q = session.query(func.max(DialogueLine.id)).scalar()
         if q:
             last_line_id = q
 
