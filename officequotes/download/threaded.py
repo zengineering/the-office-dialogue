@@ -44,39 +44,45 @@ def writeToDatabase(queue):
     '''
     Store all quotes for an episode using a single database commit
     '''
+    last_line_id = 1
     with contextSession() as session:
-        last_line_id = session.query(func.max(DialogueLine.id)).one_or_none()
-        if last_line_id is None:
-            last_line_id = 1
+        q = session.query(func.max(DialogueLine.id)).one_or_none()
+        if q:
+            last_line_id = q
 
     while not current_thread().stopped:
         if not queue.empty():
             episode = queue.get_nowait()
             if episode:
                 writeEpisodeToDb(episode, last_line_id)
+                last_line_id += len(episode.quotes)
 
 
 def writeEpisodeToDb(episode, last_line_id):
     '''
     Write all quotes in an episode to the database
     '''
+    return True
     conn = engineConnection()
-    # write dialogue lines first
+
+    return
+    # write all dialogue lines to db; tracking last_id_number
     conn.execute(
         DialogueLine.__table__.insert(),
-        [{"id": i+last_line_id, "content": quote.line} for i, quote in episode.quotes]
+        [{"id": i+last_line_id, "content": quote.line} for i, quote in enumerate(episode.quotes)]
     )
-
+    return
     speaker_ids = []
     for quote in episode.quotes:
         speaker_id = conn.execute(
-            select([Character.__table__.id]).where(Character.__table__.name == quote.speaker))
+            select([Character.__table__.c.id]).where(Character.__table__.c.name == quote.speaker)
+        ).scalar()
         if speaker_id is not None:
             speaker_ids.append(speaker_id)
         else:
             speaker_ids.append(
                 conn.execute(Character.__table__.insert().values(name=quote.speaker)).lastrowid)
-
+    return
     conn.execute(
         OfficeQuote.__table__.insert(),
         [{'season': episode.season,
