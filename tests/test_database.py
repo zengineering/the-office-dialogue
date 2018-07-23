@@ -1,16 +1,7 @@
 import pytest
-from sqlalchemy import exists, func
-from collections import namedtuple
-
-Quote = namedtuple("Quote", ('season', 'episode', 'speaker', 'line', 'deleted'))
 
 from officequotes.database import (contextSession, setupDbEngine, addQuote, getCharacter,
                                    Character, OfficeQuote, DialogueLine)
-
-
-@pytest.fixture
-def quote():
-    return Quote(1, 1, "Speaker{}", "Line {}", False)
 
 
 def test_db_addQuote(db, quote):
@@ -48,19 +39,19 @@ def test_db_existingSpeaker(db, quote):
         assert session.query(OfficeQuote).filter(OfficeQuote.speaker_id==char.id).count() == 2
 
 
-def test_db_addEpisode(db, quote):
+def test_db_addEpisode(db, fmt_quote):
     quote_count = 1024
     speaker_count = 100
     for i in range(quote_count):
-        addQuote(quote.season, quote.episode, quote.speaker.format(i % speaker_count),
-                 quote.line.format(i), quote.deleted)
+        addQuote(fmt_quote.season, fmt_quote.episode, fmt_quote.speaker.format(i % speaker_count),
+                 fmt_quote.line.format(i), fmt_quote.deleted)
 
     with contextSession() as session:
         assert session.query(Character.id).count() == speaker_count
         assert len(list(session.query(Character.name).distinct())) == speaker_count
         assert session.query(DialogueLine.id).count() == quote_count
-        assert all(map(lambda s: s[0] == quote.season, session.query(OfficeQuote.season).all()))
-        assert all(map(lambda e: e[0] == quote.episode, session.query(OfficeQuote.episode).all()))
+        assert all(map(lambda s: s[0] == fmt_quote.season, session.query(OfficeQuote.season).all()))
+        assert all(map(lambda e: e[0] == fmt_quote.episode, session.query(OfficeQuote.episode).all()))
 
 
 def test_db_getCharacter(db, quote):
