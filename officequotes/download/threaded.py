@@ -45,7 +45,7 @@ def writeToDatabase(queue):
     Store all quotes for an episode using a single database commit
     '''
     last_line_id = 1
-    with contextSession() as session:
+    with contextSession(commit=False) as session:
         q = session.query(func.max(DialogueLine.id)).scalar()
         if q:
             last_line_id = q

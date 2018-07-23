@@ -28,9 +28,3 @@ def getCharacter(**kwargs):
             session.expunge_all()
         return q
 
-
-def updateCharacterName(old_name, new_name):
-    with contextSession() as session:
-        char = session.query(Character).filter_by(Character.name == old_name).one_or_none()
-        if char:
-            char.name = new
