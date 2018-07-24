@@ -5,7 +5,7 @@ from pathlib import Path
 from officequotes.database import contextSession, setupDbEngine, Character
 
 def correctNamesInDb(name_corrections):
-    with contextSession() as session:
+    with contextSession(commit=True) as session:
         name_and_char = (
             (name, session.query(Character).filter(Character.name == name).one_or_none())
             for name in name_corrections.keys()
