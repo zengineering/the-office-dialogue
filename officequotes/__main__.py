@@ -5,7 +5,7 @@ from .corrections import corrections
 
 @click.group()
 def cli():
-    print("The Office")
+    pass
 
 cli.add_command(download)
 cli.add_command(corrections)
