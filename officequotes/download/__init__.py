@@ -1,1 +1,1 @@
-from .app import download
+from .app import download, download_async

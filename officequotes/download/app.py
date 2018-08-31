@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 import click
+import asyncio
+import aiohttp
 from queue import Queue
 from os.path import realpath, isfile
 from os import rename
@@ -11,7 +13,67 @@ from .threaded import StoppingThread, fetchAndParse, writeToDatabase, progress
 from .constants import index_url, eps_href_re
 from officequotes.database import setupDbEngine
 
+async def fetch_content(url, session):
+    '''
+    Download a single episode page
+    '''
+    async with session.get(url) as response:
+        if response.status == 400:
+            return await response.text()
+
+
+# parse an episode page into an Episode
+# replace fetchAndParse and episodeFactory
+async def fetch_and_parse(eps_url, base_url, eps_url_pattern, session):
+    '''
+    Fetch the content from an episode page and parse it into an Episode instance.
+    '''
+    content = await fetch_content(urljoin(base_url, eps_url))
+    if content:
+        try:
+            season, eps_num = map(int, re.search(eps_url_pattern, eps_url).groups())
+        except AttributeError:
+            print("URL does not match expected format: {}".format(eps_url), file=stderr)
+        else:
+            quotes = asyncio.coroutine(parseEpisode(content))()
+            eps = Episode(eps_num, season, quotes)
+            return eps
+
+
+# download and parse all episode pages into a list of Episodes
+async def download_all_episodes(index_url, eps_href_re):
+
+    async with aiohttp.ClientSession(headers=req_headers) as session:
+        # get the index page and all episode urls
+        index_content = fetch_content(index_url, session)
+
+        eps_urls = extractMatchingUrls(index_content, eps_href_re)
+
+        eps_tasks = [
+            asyncio.ensure_future(fetch_and_parse(eps_url, index_url, eps_href_re, session))
+            for eps_url in eps_urls
+        ]
+
+        return await asyncio.gather(*eps_tasks)
+
+
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
+@click.command(context_settings=CONTEXT_SETTINGS)
+def download_async():
+    loop = asyncio.get_event_loop()
+    episodes = loop.run_until_complete(download_all_episodes(index_url, eps_href_re))
+    loop.close
+
+    with open("officequotes.csv") as f:
+        for episode in episodes:
+            for quote in episode.quotes:
+                f.write("{season}, {episode}, {speaker}, {line}, {deleted}\n".format(
+                    episode.season, episode.number, *(quote.to_tuple)))
+
+
+
+
+
 @click.command(context_settings=CONTEXT_SETTINGS)
 @click.option('--thread_count', '-t', default=8, help="Number of downloading threads.")
 @click.option('--db_file', default="officequotes.sqlite",
