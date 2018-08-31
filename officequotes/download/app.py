@@ -3,23 +3,33 @@
 import click
 import asyncio
 import aiohttp
+import re
+from sys import stderr
+from urllib.parse import urljoin
+
 from queue import Queue
 from os.path import realpath, isfile
 from os import rename
 
 from .fetch import fetchContent
-from .parse import extractMatchingUrls
+from .parse import extractMatchingUrls, parseEpisode
 from .threaded import StoppingThread, fetchAndParse, writeToDatabase, progress
-from .constants import index_url, eps_href_re
+from .constants import index_url, eps_href_re, req_headers
+from .dataclasses import Episode
 from officequotes.database import setupDbEngine
+
+class OfficeError(Exception):
+    pass
 
 async def fetch_content(url, session):
     '''
     Download a single episode page
     '''
     async with session.get(url) as response:
-        if response.status == 400:
-            return await response.text()
+        if response.status == 200:
+            return await response.read()
+        else:
+            print("Request failed for {}".format(url), file=stderr)
 
 
 # parse an episode page into an Episode
@@ -28,7 +38,7 @@ async def fetch_and_parse(eps_url, base_url, eps_url_pattern, session):
     '''
     Fetch the content from an episode page and parse it into an Episode instance.
     '''
-    content = await fetch_content(urljoin(base_url, eps_url))
+    content = await fetch_content(urljoin(base_url, eps_url), session)
     if content:
         try:
             season, eps_num = map(int, re.search(eps_url_pattern, eps_url).groups())
@@ -41,20 +51,23 @@ async def fetch_and_parse(eps_url, base_url, eps_url_pattern, session):
 
 
 # download and parse all episode pages into a list of Episodes
-async def download_all_episodes(index_url, eps_href_re):
+async def download_all_episodes(base_url, eps_href_re):
 
     async with aiohttp.ClientSession(headers=req_headers) as session:
         # get the index page and all episode urls
-        index_content = fetch_content(index_url, session)
+        index_content = await fetch_content(base_url, session)
 
-        eps_urls = extractMatchingUrls(index_content, eps_href_re)
+        if index_content:
+            eps_urls = extractMatchingUrls(index_content, eps_href_re)
 
-        eps_tasks = [
-            asyncio.ensure_future(fetch_and_parse(eps_url, index_url, eps_href_re, session))
-            for eps_url in eps_urls
-        ]
+            eps_tasks = [
+                asyncio.ensure_future(fetch_and_parse(eps_url, base_url, eps_href_re, session))
+                for eps_url in eps_urls
+            ]
 
-        return await asyncio.gather(*eps_tasks)
+            return await asyncio.gather(*eps_tasks)
+        else:
+            raise OfficeError("Could not download index page")
 
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
