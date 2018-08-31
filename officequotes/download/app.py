@@ -45,7 +45,7 @@ async def fetch_and_parse(eps_url, base_url, eps_url_pattern, session):
         except AttributeError:
             print("URL does not match expected format: {}".format(eps_url), file=stderr)
         else:
-            quotes = asyncio.coroutine(parseEpisode(content))()
+            quotes = await asyncio.coroutine(parseEpisode(content))()
             eps = Episode(eps_num, season, quotes)
             return eps
 
