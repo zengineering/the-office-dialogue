@@ -4,6 +4,7 @@ import click
 import asyncio
 import aiohttp
 import re
+import json
 from tqdm import tqdm
 from sys import stderr
 from urllib.parse import urljoin
@@ -48,7 +49,7 @@ async def fetch_and_parse(eps_url, eps_url_pattern, session):
             print("URL does not match expected format: {}".format(eps_url), file=stderr)
         else:
             quotes = await asyncio.coroutine(parseEpisode)(content)
-            eps = Episode(eps_num, season, quotes)
+            eps = Episode(eps_num, season, [q for q in quotes if not q.deleted])
             return eps
 
 
@@ -67,8 +68,9 @@ async def download_all_episodes(base_url, eps_url_regex):
                 for eps_url in eps_urls
             ]
 
-            return await asyncio.gather(*eps_tasks)
-            #return [await eps for eps in tqdm(asyncio.as_completed(tasks), total=len(tasks))]
+            #return await asyncio.gather(*eps_tasks)
+            return [await eps
+                    for eps in tqdm(asyncio.as_completed(eps_tasks), total=len(eps_tasks))]
         else:
             raise OfficeError("Could not download index page")
 
@@ -87,11 +89,12 @@ def download_async(output_dir):
     output_root = Path(output_dir).resolve()
     output_root.mkdir(parents=True, exist_ok=True)
     for episode in episodes:
-        eps_file =  "the-office-s{:02}-e{:02}.csv".format(episode.season, episode.number)
+        eps_file =  "the-office-S{:02}-E{:02}.json".format(episode.season, episode.number)
         with open(output_root / eps_file, 'w') as f:
-            for quote in episode.quotes:
-                f.write("{}, {}, {}, {}, {}\n".format(
-                    episode.season, episode.number, *(quote.to_tuple())))
+            json.dump(episode.to_dict(), f)
+            #for quote in episode.quotes:
+            #    f.write("{}, {}, {}, {}, {}\n".format(
+            #        episode.season, episode.number, *(quote.to_tuple())))
 
 
 
