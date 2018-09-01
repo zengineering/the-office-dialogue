@@ -57,7 +57,6 @@ async def download_all_episodes(base_url, eps_url_regex):
     async with aiohttp.ClientSession(headers=req_headers) as session:
         # get the index page and all episode urls
         index_content = await fetch_content(base_url, session)
-
         if index_content:
             eps_urls = extractMatchingUrls(index_content, eps_url_regex)
 
