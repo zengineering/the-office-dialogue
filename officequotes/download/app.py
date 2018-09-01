@@ -7,6 +7,7 @@ import re
 from tqdm import tqdm
 from sys import stderr
 from urllib.parse import urljoin
+from pathlib import Path
 
 from queue import Queue
 from os.path import realpath, isfile
@@ -58,32 +59,39 @@ async def download_all_episodes(base_url, eps_url_regex):
         # get the index page and all episode urls
         index_content = await fetch_content(base_url, session)
         if index_content:
-            eps_urls = extractMatchingUrls(index_content, eps_url_regex)
+            eps_urls = list(extractMatchingUrls(index_content, eps_url_regex))[:1]
 
-            tasks = [
+            eps_tasks = [
                 asyncio.ensure_future(
                     fetch_and_parse(urljoin(base_url, eps_url), eps_url_regex, session))
                 for eps_url in eps_urls
             ]
 
-            #return await asyncio.gather(*eps_tasks)
-            return [await eps for eps in tqdm(asyncio.as_completed(tasks), total=len(tasks))]
+            return await asyncio.gather(*eps_tasks)
+            #return [await eps for eps in tqdm(asyncio.as_completed(tasks), total=len(tasks))]
         else:
             raise OfficeError("Could not download index page")
 
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 @click.command(context_settings=CONTEXT_SETTINGS)
-def download_async():
+@click.option('--output_dir', '-o', default="officequotes-csv", help="Directory for output csv.")
+def download_async(output_dir):
+    '''
+    Download all quotes from all episodes of The Office and write to csv files.
+    '''
     loop = asyncio.get_event_loop()
     episodes = loop.run_until_complete(download_all_episodes(index_url, eps_url_regex))
     loop.close()
 
-    with open("officequotes.csv") as f:
-        for episode in episodes:
+    output_root = Path(output_dir).resolve()
+    output_root.mkdir(parents=True, exist_ok=True)
+    for episode in episodes:
+        eps_file =  "the-office-s{:02}-e{:02}.csv".format(episode.season, episode.number)
+        with open(output_root / eps_file, 'w') as f:
             for quote in episode.quotes:
-                f.write("{season}, {episode}, {speaker}, {line}, {deleted}\n".format(
-                    episode.season, episode.number, *(quote.to_tuple)))
+                f.write("{}, {}, {}, {}, {}\n".format(
+                    episode.season, episode.number, *(quote.to_tuple())))
 
 
 
