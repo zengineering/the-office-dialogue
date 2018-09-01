@@ -21,7 +21,7 @@ class StoppingThread(Thread):
         return self._stop_event.is_set()
 
 
-def fetchAndParse(url_q, episode_q, failed_q, eps_href_re, index_url):
+def fetchAndParse(url_q, episode_q, failed_q, eps_url_regex, index_url):
     '''
     Pop a url from the url queue
     Download and parse the episode page at that url
@@ -30,13 +30,13 @@ def fetchAndParse(url_q, episode_q, failed_q, eps_href_re, index_url):
     '''
     while not url_q.empty():
         eps_url = url_q.get()
-        episode = episodeFactory(urljoin(index_url, eps_url), eps_href_re)
+        episode = episodeFactory(urljoin(index_url, eps_url), eps_url_regex)
         episode_q.put(episode)
         if episode is None:
             failed_q.put(eps_url)
 
     while not failed_q.empty():
-        episode_q.put(episodeFactory(urljoin(index_url, eps_url), eps_href_re))
+        episode_q.put(episodeFactory(urljoin(index_url, eps_url), eps_url_regex))
 
 
 

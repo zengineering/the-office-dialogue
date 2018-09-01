@@ -15,7 +15,7 @@ from os import rename
 from .fetch import fetchContent
 from .parse import extractMatchingUrls, parseEpisode
 from .threaded import StoppingThread, fetchAndParse, writeToDatabase, progress
-from .constants import index_url, eps_href_re, req_headers
+from .constants import index_url, eps_url_regex, req_headers
 from .dataclasses import Episode
 from officequotes.database import setupDbEngine
 
@@ -52,18 +52,18 @@ async def fetch_and_parse(eps_url, eps_url_pattern, session):
 
 
 # download and parse all episode pages into a list of Episodes
-async def download_all_episodes(base_url, eps_href_re):
+async def download_all_episodes(base_url, eps_url_regex):
 
     async with aiohttp.ClientSession(headers=req_headers) as session:
         # get the index page and all episode urls
         index_content = await fetch_content(base_url, session)
 
         if index_content:
-            eps_urls = extractMatchingUrls(index_content, eps_href_re)
+            eps_urls = extractMatchingUrls(index_content, eps_url_regex)
 
             tasks = [
                 asyncio.ensure_future(
-                    fetch_and_parse(urljoin(base_url, eps_url), eps_href_re, session))
+                    fetch_and_parse(urljoin(base_url, eps_url), eps_url_regex, session))
                 for eps_url in eps_urls
             ]
 
@@ -77,7 +77,7 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 @click.command(context_settings=CONTEXT_SETTINGS)
 def download_async():
     loop = asyncio.get_event_loop()
-    episodes = loop.run_until_complete(download_all_episodes(index_url, eps_href_re))
+    episodes = loop.run_until_complete(download_all_episodes(index_url, eps_url_regex))
     loop.close()
 
     with open("officequotes.csv") as f:
@@ -104,7 +104,7 @@ def download(thread_count, db_file):
 
     # get the index page and all episode urls
     index_content = fetchContent(index_url)
-    eps_urls = extractMatchingUrls(index_content, eps_href_re)
+    eps_urls = extractMatchingUrls(index_content, eps_url_regex)
 
     url_q = Queue()
     episode_q = Queue()
@@ -125,7 +125,7 @@ def download(thread_count, db_file):
     # producer threads for fetching and parsing episode pages
     thread_pool = [
         StoppingThread(target=fetchAndParse,
-                       args=(url_q, episode_q, failed_q, eps_href_re, index_url))
+                       args=(url_q, episode_q, failed_q, eps_url_regex, index_url))
         for _ in range(thread_count)
     ]
 

@@ -3,7 +3,7 @@ import requests
 from tempfile import NamedTemporaryFile
 
 from officequotes.download.fetch import fetchContent, episodeFactory
-from officequotes.download.constants import eps_href_re
+from officequotes.download.constants import eps_url_regex
 
 
 @pytest.fixture
@@ -22,12 +22,12 @@ def test_dl_fetchContent_badurl(episode_url):
 
 
 def test_dl_episodeFactory(episode_url):
-    episode = episodeFactory(episode_url, eps_href_re)
+    episode = episodeFactory(episode_url, eps_url_regex)
     assert episode.season == 5
     assert episode.number == 13
     assert len(episode.quotes) > 100
 
 
 def test_dl_episodeFactory_badurl():
-    episode = episodeFactory("bad_url", eps_href_re)
+    episode = episodeFactory("bad_url", eps_url_regex)
     assert episode is None

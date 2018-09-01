@@ -4,7 +4,7 @@ import pytest
 
 from context import test_path
 from officequotes.download.app import fetch_content, fetch_and_parse
-from officequotes.download.constants import req_headers, eps_href_re
+from officequotes.download.constants import req_headers, eps_url_regex
 from officequotes.download.dataclasses import Episode
 
 @pytest.fixture
@@ -35,7 +35,7 @@ async def test_async_fetch_content(episode_url, aioh_session):
 
 @pytest.mark.asyncio
 async def test_async_fetch_and_parse(aioh_session, episode_url):
-    episode = await fetch_and_parse(episode_url, eps_href_re, aioh_session)
+    episode = await fetch_and_parse(episode_url, eps_url_regex, aioh_session)
     assert isinstance(episode, Episode)
     assert episode.season == 5
     assert episode.number == 13

@@ -3,7 +3,7 @@ from threading import current_thread, Thread
 from time import sleep, time
 from queue import Queue
 
-from officequotes.download.constants import eps_href_re
+from officequotes.download.constants import eps_url_regex
 from officequotes.download.threaded import (
     writeEpisodeToDb, StoppingThread, fetchAndParse, writeToDatabase)
 from officequotes.download.dataclasses import Episode, Quote
@@ -58,7 +58,7 @@ def test_dlapp_fetchAndParse():
         url_q.put("no{}.php".format(url))
 
     # producer threads for fetching and parsing episode pages
-    t = Thread(target=fetchAndParse, args=(url_q, eps_q, fail_q, eps_href_re, index_url))
+    t = Thread(target=fetchAndParse, args=(url_q, eps_q, fail_q, eps_url_regex, index_url))
     t.start()
     t.join()
     assert url_q.empty()

@@ -8,5 +8,5 @@ req_headers = {"User-Agent":
 
 index_url = "http://www.officequotes.net/index.php"
 
-eps_href_re = re.compile("no(\d)-(\d+).php")
+eps_url_regex = re.compile("no(\d)-(\d+).php")
 
