@@ -4,6 +4,7 @@ import click
 import asyncio
 import aiohttp
 import re
+from tqdm import tqdm
 from sys import stderr
 from urllib.parse import urljoin
 
@@ -45,7 +46,7 @@ async def fetch_and_parse(eps_url, base_url, eps_url_pattern, session):
         except AttributeError:
             print("URL does not match expected format: {}".format(eps_url), file=stderr)
         else:
-            quotes = await asyncio.coroutine(parseEpisode(content))()
+            quotes = await asyncio.coroutine(parseEpisode)(content)
             eps = Episode(eps_num, season, quotes)
             return eps
 
@@ -60,12 +61,13 @@ async def download_all_episodes(base_url, eps_href_re):
         if index_content:
             eps_urls = extractMatchingUrls(index_content, eps_href_re)
 
-            eps_tasks = [
+            tasks = [
                 asyncio.ensure_future(fetch_and_parse(eps_url, base_url, eps_href_re, session))
                 for eps_url in eps_urls
             ]
 
-            return await asyncio.gather(*eps_tasks)
+            #return await asyncio.gather(*eps_tasks)
+            return [await eps for eps in tqdm(asyncio.as_completed(tasks), total=len(tasks))]
         else:
             raise OfficeError("Could not download index page")
 
@@ -75,7 +77,7 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 def download_async():
     loop = asyncio.get_event_loop()
     episodes = loop.run_until_complete(download_all_episodes(index_url, eps_href_re))
-    loop.close
+    loop.close()
 
     with open("officequotes.csv") as f:
         for episode in episodes:
