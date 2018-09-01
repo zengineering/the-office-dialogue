@@ -35,11 +35,11 @@ async def fetch_content(url, session):
 
 # parse an episode page into an Episode
 # replace fetchAndParse and episodeFactory
-async def fetch_and_parse(eps_url, base_url, eps_url_pattern, session):
+async def fetch_and_parse(eps_url, eps_url_pattern, session):
     '''
     Fetch the content from an episode page and parse it into an Episode instance.
     '''
-    content = await fetch_content(urljoin(base_url, eps_url), session)
+    content = await fetch_content(eps_url, session)
     if content:
         try:
             season, eps_num = map(int, re.search(eps_url_pattern, eps_url).groups())
@@ -62,7 +62,8 @@ async def download_all_episodes(base_url, eps_href_re):
             eps_urls = extractMatchingUrls(index_content, eps_href_re)
 
             tasks = [
-                asyncio.ensure_future(fetch_and_parse(eps_url, base_url, eps_href_re, session))
+                asyncio.ensure_future(
+                    fetch_and_parse(urljoin(base_url, eps_url), eps_href_re, session))
                 for eps_url in eps_urls
             ]
 
