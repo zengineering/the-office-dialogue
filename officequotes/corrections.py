@@ -12,7 +12,7 @@ def correctNamesInJson(name_corrections, json_files):
                 for quote in episode['quotes']:
                     quote['speaker'] = name_corrections.get(quote['speaker'], quote['speaker'])
                 f.seek(0)
-                json.dump(episode, f)
+                json.dump(episode, f, indent=4, ensure_ascii=False)
         except Exception as e:
             print("Corrections failed on {}:\n{}".format(jf, e))
 
@@ -29,6 +29,6 @@ def corrections(json_dir):
         name_corrections = json.load(f)
 
     json_path_root = Path(json_dir).resolve()
-    json_files = json_path_root.glob('**/the-office-S*-E*.json')
+    json_files = list(json_path_root.glob('**/the-office-S*-E*.json'))
 
     correctNamesInJson(name_corrections, json_files)

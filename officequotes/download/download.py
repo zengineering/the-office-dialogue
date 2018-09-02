@@ -38,7 +38,7 @@ def write_episodes_json(episodes, root_dir):
     for episode in tqdm(episodes):
         eps_file =  "the-office-S{:02}-E{:02}.json".format(episode.season, episode.number)
         with open(root_dir/"season{}".format(episode.season)/eps_file, 'w') as f:
-            json.dump(episode.to_dict(), f)
+            json.dump(episode.to_dict(), f, indent=4, ensure_ascii=False)
 
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
