@@ -28,6 +28,6 @@ def episodeFactory(eps_url, eps_url_pattern):
     except AttributeError:
         print("URL does not match expected format: {}".format(eps_url), file=stderr)
     except requests.RequestException:
-        print("Request for {} failed:\n\t{}".format(eps_url), file=stderr)
+        print("Request failed for {}".format(eps_url), file=stderr)
     return eps
 
