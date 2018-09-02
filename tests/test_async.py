@@ -5,8 +5,8 @@ from pathlib import Path
 
 import officequotes
 from context import test_path
-from officequotes.download.app import fetch_content, fetch_and_parse
-from officequotes.download.constants import req_headers, eps_url_regex
+from officequotes.download.app import fetch_content, fetch_and_parse, download_all_episodes
+from officequotes.download.constants import req_headers, eps_url_regex, index_url
 from officequotes.download.dataclasses import Episode
 
 @pytest.fixture
@@ -19,6 +19,8 @@ async def aioh_session():
 def episode_url():
     return "http://officequotes.net/no5-13.php"
 
+def episode_urls():
+    return ("http://officequotes.net/no5-13.php", )#"http://officequotes.net/no6-04.php")
 
 @pytest.fixture
 def episodeHtml(*args):
@@ -56,7 +58,17 @@ async def test_async_fetch_and_parse_offline(monkeypatch, aioh_session, episode_
         assert len(episode.quotes) > 100
 
 
-
 #@pytest.mark.asyncio
-#async def test_download_all_episodes(base_url, eps_url_regex):
-#    pass
+#async def test_async_download_all_episodes(monkeypatch):
+#    with monkeypatch.context() as mp:
+#        mp.setattr(tqdm, 'tqdm', iter)
+#        mp.setattr(officequotes.download.parse,
+#                   'extractMatchingUrls',
+#                   asyncio.coroutine(episode_urls))
+#        episodes = await download_all_episodes(index_url, eps_url_regex)
+#        for episode in episodes:
+#            assert isinstance(episode, Episode)
+#            assert episode.season in (5,6)
+#            assert episode.number in (4,13)
+#            assert len(episode.quotes) > 100
+

@@ -60,12 +60,10 @@ async def download_all_episodes(base_url, eps_url_regex):
         # get the index page and all episode urls
         index_content = await fetch_content(base_url, session)
         if index_content:
-            eps_urls = list(extractMatchingUrls(index_content, eps_url_regex))[:1]
-
             eps_tasks = [
                 asyncio.ensure_future(
                     fetch_and_parse(urljoin(base_url, eps_url), eps_url_regex, session))
-                for eps_url in eps_urls
+                for eps_url in extractMatchingUrls(index_content, eps_url_regex)
             ]
 
             #return await asyncio.gather(*eps_tasks)
