@@ -6,12 +6,15 @@ from tqdm import tqdm
 
 def correctNamesInJson(name_corrections, json_files):
     for jf in tqdm(json_files):
-        with open(jf, 'r+') as f:
-            episode = json.load(f)
-            for quote in tqdm(episode['quotes']):
-                quote['speaker'] = name_corrections.get(quote['speaker'], quote['speaker'])
-            f.seek(0)
-            json.dump(episode, f)
+        try:
+            with open(jf, 'r+') as f:
+                episode = json.load(f)
+                for quote in episode['quotes']:
+                    quote['speaker'] = name_corrections.get(quote['speaker'], quote['speaker'])
+                f.seek(0)
+                json.dump(episode, f)
+        except Exception as e:
+            print("Corrections failed on {}:\n{}".format(jf, e))
 
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
@@ -25,10 +28,7 @@ def corrections(json_dir):
     with open(resources_root/"name_corrections.json") as f:
         name_corrections = json.load(f)
 
-    dir_tree = os.walk(os.path.realpath(json_dir))
-    next(dir_tree) # skip the top
-    json_files = []
-    for season, _, episodes in dir_tree:
-        json_files.extend(os.path.join(season, episode) for episode in episodes)
+    json_path_root = Path(json_dir).resolve()
+    json_files = json_path_root.glob('**/the-office-S*-E*.json')
 
     correctNamesInJson(name_corrections, json_files)
