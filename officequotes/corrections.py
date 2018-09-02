@@ -1,24 +1,23 @@
 import json
 import click
+import os
 from pathlib import Path
+from tqdm import tqdm
 
-from officequotes.database import contextSession, setupDbEngine, Character
-
-def correctNamesInDb(name_corrections):
-    with contextSession(commit=True) as session:
-        name_and_chars = (
-            (name, session.query(Character).filter(Character.name == name).all())
-            for name in name_corrections.keys()
-        )
-        for name, chars in name_and_chars:
-            for char in chars:
-                char.name = name_corrections[name]
+def correctNamesInJson(name_corrections, json_files):
+    for jf in tqdm(json_files):
+        with open(jf, 'r+') as f:
+            episode = json.load(f)
+            for quote in tqdm(episode['quotes']):
+                quote['speaker'] = name_corrections.get(quote['speaker'], quote['speaker'])
+            f.seek(0)
+            json.dump(episode, f)
 
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 @click.command(context_settings=CONTEXT_SETTINGS)
-@click.argument('db_file', type=click.Path(exists=True))
-def corrections(db_file):
+@click.argument('json_dir', type=click.Path(exists=True))
+def corrections(json_dir):
     '''
     Read JSON with character name corrections and update the database accordingly.
     '''
@@ -26,6 +25,10 @@ def corrections(db_file):
     with open(resources_root/"name_corrections.json") as f:
         name_corrections = json.load(f)
 
-    setupDbEngine("sqlite:///{}".format(Path(db_file).resolve()))
+    dir_tree = os.walk(os.path.realpath(json_dir))
+    next(dir_tree) # skip the top
+    json_files = []
+    for season, _, episodes in dir_tree:
+        json_files.extend(os.path.join(season, episode) for episode in episodes)
 
-    correctNamesInDb(name_corrections)
+    correctNamesInJson(name_corrections, json_files)
