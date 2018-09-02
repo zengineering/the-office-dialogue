@@ -15,9 +15,10 @@ def extractMatchingUrls(content, pattern):
     Extract an iterable of URLs matching the given pattern
     '''
     # extract the a tags with href's matching the re pattern
-    a_tags = withoutDoctypes(BeautifulSoup(content, "lxml", parse_only=SoupStrainer("a", href=pattern)))
+    a_tags = withoutDoctypes(
+        BeautifulSoup(content, "lxml", parse_only=SoupStrainer("a", href=pattern)))
     # filter out Doctype's and extract the urls
-    return map(lambda a: a["href"], a_tags)
+    return list(map(lambda a: a["href"], a_tags))
 
 
 def removeTags(soup):

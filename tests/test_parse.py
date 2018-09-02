@@ -8,7 +8,7 @@ from context import test_path
 from officequotes.download.parse import (withoutDoctypes, removeTags, parseScene, parseEpisode,
                                          extractMatchingUrls)
 from officequotes.download.dataclasses import Quote
-from officequotes.download.constants import eps_href_re
+from officequotes.download.constants import eps_url_regex
 
 @pytest.fixture
 def testSoup():
@@ -116,7 +116,7 @@ def test_parse_extractMatchingUrls(indexHtml):
     '''
     Extract an iterable of URLs matching the given pattern
     '''
-    urls = list(extractMatchingUrls(indexHtml, eps_href_re))
+    urls = list(extractMatchingUrls(indexHtml, eps_url_regex))
     assert len(urls) == 186
     assert "no1-01.php" in urls
     assert "no5-13.php" in urls
