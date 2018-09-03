@@ -70,3 +70,10 @@ def test_db_UniqueValueDict():
 
 def test_db_addToDb():
     pass
+    # lines
+    # speaker id's
+    # line id's
+
+
+#def test_db_relationship(db, quote):
+#    pass
