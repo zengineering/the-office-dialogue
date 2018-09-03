@@ -18,6 +18,10 @@ class UniqueValueDict():
     def __getitem__(self, key):
         return self.__items[key]
 
+    def __setitem__(self, key, value):
+        if key not in self.__items:
+            self.__items[key] = value
+
     def items(self):
         return self.__items
 
