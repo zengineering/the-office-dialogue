@@ -3,7 +3,7 @@ from sqlalchemy import exists, func
 
 from officequotes.database import addQuote, Character, contextSession
 from officequotes.database.session_interface import db_add
-from officequotes.corrections import correctNamesInDb
+from officequotes.corrections import correctNamesInJson
 
 @pytest.fixture
 def name_corrections():

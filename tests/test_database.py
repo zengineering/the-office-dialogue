@@ -2,6 +2,7 @@ import pytest
 
 from officequotes.database import (contextSession, setupDbEngine, addQuote, getCharacter,
                                    Character, OfficeQuote, DialogueLine)
+from officequotes.database.create_db import UniqueValueDict
 
 
 def test_db_addQuote(db, quote):
@@ -58,3 +59,14 @@ def test_db_getCharacter(db, quote):
     addQuote(*quote)
     assert getCharacter(name=quote.speaker) is not None
 
+
+def test_db_UniqueValueDict():
+    uvd = UniqueValueDict()
+    keys = ('a', 'b', 'c', 'b', 'a', 'd')
+    [uvd[k] for k in keys]
+    for val, key in enumerate(('a', 'b', 'c', 'd'), 1):
+        assert val == uvd[key]
+
+
+def test_db_addToDb():
+    pass
