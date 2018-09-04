@@ -27,7 +27,7 @@ class UniqueValueDict():
 
 
 
-def addToDb(episode, speaker_ids, base_line_id):
+def addEpisodeToDb(episode, speaker_ids, base_line_id):
     engine = getEngine()
     conn = engine.connect()
     conn.execute(
@@ -51,6 +51,9 @@ def addToDb(episode, speaker_ids, base_line_id):
         ]
     )
 
+
+def addCharactersToDb(characters):
+    pass
 
 
 def create_db(db_path, json_dir):

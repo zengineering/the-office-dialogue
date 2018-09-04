@@ -69,10 +69,10 @@ def test_db_UniqueValueDict():
         assert val == uvd[key]
 
 
-def test_db_addToDb(db, episode_dict):
+def test_db_addEpisodeToDb(db, episode_dict):
     speaker_ids = UniqueValueDict()
     base_line_id = 10
-    addToDb(episode_dict, speaker_ids, base_line_id)
+    addEpisodeToDb(episode_dict, speaker_ids, base_line_id)
     with contextSession() as session:
         assert session.query(OfficeQuote).count() == 3
         assert all(map(lambda q: q.season == 5 and q.episode == 13,
