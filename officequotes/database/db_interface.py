@@ -6,6 +6,9 @@ from .tables import Base
 Session = sessionmaker()
 engine = None
 
+def getEngine():
+    return engine
+
 @contextmanager
 def contextSession(*, commit=False):
     """
@@ -28,6 +31,6 @@ def contextSession(*, commit=False):
 
 def setupDb(db_path):
     global engine
-    engine = create_engine("sqlite:///{}".format(db_path), echo=True)
+    engine = create_engine("sqlite:///{}".format(db_path), echo=False)
     Session.configure(bind=engine)
     Base.metadata.create_all(engine)

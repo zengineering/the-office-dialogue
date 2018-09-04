@@ -4,17 +4,14 @@ import os
 from pathlib import Path
 from tqdm import tqdm
 
-def correctNamesInJson(name_corrections, json_files):
-    for jf in tqdm(json_files):
-        try:
-            with open(jf, 'r+') as f:
-                episode = json.load(f)
-                for quote in episode['quotes']:
-                    quote['speaker'] = name_corrections.get(quote['speaker'], quote['speaker'])
-                f.seek(0)
-                json.dump(episode, f, indent=4, ensure_ascii=False)
-        except Exception as e:
-            print("Corrections failed on {}:\n{}".format(jf, e))
+def correctNamesInJson(json_file, name_corrections):
+    with open(json_file, 'r+') as f:
+        episode = json.load(f)
+        for quote in episode['quotes']:
+            quote['speaker'] = name_corrections.get(quote['speaker'],
+                                                    quote['speaker'])
+        f.seek(0)
+        json.dump(episode, f, indent=4, ensure_ascii=False)
 
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
@@ -31,4 +28,9 @@ def corrections(json_dir):
     json_path_root = Path(json_dir).resolve()
     json_files = list(json_path_root.glob('**/the-office-S*-E*.json'))
 
-    correctNamesInJson(name_corrections, json_files)
+    for jf in tqdm(json_files):
+        try:
+            correctNamesInJson(jf, name_corrections)
+        except Exception as e:
+            print("Corrections failed on {}:\n{}".format(jf, e))
+

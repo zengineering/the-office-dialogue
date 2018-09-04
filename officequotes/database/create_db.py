@@ -3,7 +3,7 @@ from collections import defaultdict
 from tqdm import tqdm
 from pathlib import Path
 
-from .db_interface import setupDb, engine
+from .db_interface import setupDb, getEngine
 from .tables import Character, DialogueLine, OfficeQuote
 
 class UniqueValueDict():
@@ -28,6 +28,7 @@ class UniqueValueDict():
 
 
 def addToDb(episode, speaker_ids, base_line_id):
+    engine = getEngine()
     conn = engine.connect()
     conn.execute(
         OfficeQuote.__table__.insert(),
