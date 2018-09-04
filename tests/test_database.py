@@ -1,8 +1,9 @@
 import pytest
 
-from officequotes.database import (contextSession, addQuote, getCharacter,
+from officequotes.database import (addQuote, getCharacter,
                                    Character, OfficeQuote, DialogueLine)
 from officequotes.database.create_db import UniqueValueDict, addToDb
+from officequotes.database.db_interface import setupDb, contextSession
 
 
 def test_db_addQuote(db, quote):
@@ -68,21 +69,21 @@ def test_db_UniqueValueDict():
         assert val == uvd[key]
 
 
-def test_db_addToDb(db, episode_dict):
-    assert db == 1
+def test_db_addToDb(episode_dict):
+    setupDb(':memory:')
     speaker_ids = UniqueValueDict()
     base_line_id = 10
     addToDb(episode_dict, speaker_ids, base_line_id)
     with contextSession() as session:
         assert session.query(OfficeQuote).count() == 3
         assert all(map(lambda q: q.season == 5 and q.episode == 13,
-                       session.query(OfficeQuotes)))
+                       session.query(OfficeQuote)))
         assert session.query(OfficeQuote).filter(
-            OfficeQuotes.speaker_id == 1).count() == 2
+            OfficeQuote.speaker_id == 1).count() == 2
         assert session.query(OfficeQuote).filter(
-            OfficeQuotes.speaker_id == 2).count() == 1
+            OfficeQuote.speaker_id == 2).count() == 1
         for i, line in enumerate(session.query(DialogueLine).order_by(DialogueLine.id)):
-            assert line.line == episode_dict.quotes[i].line
+            assert line.line == episode_dict['quotes'][i]['line']
 
 
     # lines

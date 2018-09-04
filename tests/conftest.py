@@ -15,7 +15,7 @@ from officequotes.database.db_interface import setupDb
 @pytest.fixture
 def db():
     setupDb(":memory:")
-    yield 1
+    yield
 
 
 @pytest.fixture
