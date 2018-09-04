@@ -69,8 +69,7 @@ def test_db_UniqueValueDict():
         assert val == uvd[key]
 
 
-def test_db_addToDb(episode_dict):
-    setupDb(':memory:')
+def test_db_addToDb(db, episode_dict):
     speaker_ids = UniqueValueDict()
     base_line_id = 10
     addToDb(episode_dict, speaker_ids, base_line_id)
