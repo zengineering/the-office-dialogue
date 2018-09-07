@@ -2,7 +2,7 @@ import pytest
 
 from officequotes.database import (addQuote, getCharacter,
                                    Character, OfficeQuote, DialogueLine)
-from officequotes.database.create_db import UniqueValueDict, addToDb
+from officequotes.database.create_db import UniqueValueDict, addEpisodeToDb, addCharactersToDb
 from officequotes.database.db_interface import setupDb, contextSession
 
 
@@ -85,9 +85,18 @@ def test_db_addEpisodeToDb(db, episode_dict):
             assert line.line == episode_dict['quotes'][i]['line']
 
 
-    # lines
-    # speaker id's
-    # line id's
+def test_db_addCharactersToDb(db):
+    speaker_ids = UniqueValueDict()
+    char_names = ("Michael", "Dwight", "Jim", "Pam", "Michael")
+    ids = [speaker_ids[cn] for cn in char_names]
+
+    addCharactersToDb(speaker_ids)
+    with contextSession() as session:
+        assert session.query(Character.id).count() == 4
+        for char_id, char_name in zip(ids, char_names):
+            assert session.query(Character).filter(Character.id == char_id).one().name == char_name
+
+
 
 
 #def test_db_relationship(db, quote):

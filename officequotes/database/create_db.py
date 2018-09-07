@@ -22,8 +22,17 @@ class UniqueValueDict():
         if key not in self.__items:
             self.__items[key] = value
 
+    def __len__(self):
+        return len(self.__items)
+
+    def keys(self):
+        return self.__items.keys()
+
+    def values(self):
+        return self.__items.values()
+
     def items(self):
-        return self.__items
+        return self.__items.items()
 
 
 
@@ -53,7 +62,18 @@ def addEpisodeToDb(episode, speaker_ids, base_line_id):
 
 
 def addCharactersToDb(characters):
-    pass
+    engine = getEngine()
+    conn = engine.connect()
+    conn.execute(
+        Character.__table__.insert(),
+        [
+            dict(
+                id = unique_id,
+                name = name
+            ) for name, unique_id in characters.items()
+        ]
+    )
+
 
 
 def create_db(db_path, json_dir):
@@ -67,17 +87,9 @@ def create_db(db_path, json_dir):
     for jf in tqdm(json_files):
         with open(jf) as f:
             eps_dict = json.load(f)
-        addToDb(eps_dict, speaker_ids, line_id)
+        addEpisodeToDb(eps_dict, speaker_ids, line_id)
+        line_id += len(eps_dict['quotes'])
 
-    conn = engine.connect()
-    conn.execute(
-        Character.__table__.insert(),
-        [
-            dict(
-                id = unique_id,
-                name = name
-            ) for name, unique_id in speaker_ids.items()
-        ]
-    )
+    addCharactersToDb(speaker_ids)
 
 
