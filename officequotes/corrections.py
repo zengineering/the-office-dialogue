@@ -15,7 +15,7 @@ def correctNamesInJson(json_file, name_corrections):
 
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
-@click.command(context_settings=CONTEXT_SETTINGS)
+@click.command('corrections', context_settings=CONTEXT_SETTINGS)
 @click.argument('json_dir', type=click.Path(exists=True))
 def corrections(json_dir):
     '''

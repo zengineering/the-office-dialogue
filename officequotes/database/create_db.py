@@ -1,4 +1,5 @@
 import json
+import click
 from collections import defaultdict
 from tqdm import tqdm
 from pathlib import Path
@@ -76,7 +77,14 @@ def addCharactersToDb(characters):
 
 
 
+CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
+@click.command('create_db', context_settings=CONTEXT_SETTINGS)
+@click.argument('json_dir')
+@click.option('db_path', '-o', default="officequotes.sqlite", help="Path to output database.")
 def create_db(db_path, json_dir):
+    '''
+    Insert all quotes in a dir of json files into a database
+    '''
     setupDb(db_path)
     speaker_ids = UniqueValueDict()
     line_id = 1

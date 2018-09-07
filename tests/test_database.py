@@ -97,7 +97,3 @@ def test_db_addCharactersToDb(db):
             assert session.query(Character).filter(Character.id == char_id).one().name == char_name
 
 
-
-
-#def test_db_relationship(db, quote):
-#    pass

@@ -42,7 +42,7 @@ def write_episodes_json(episodes, root_dir):
 
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
-@click.command(context_settings=CONTEXT_SETTINGS)
+@click.command('download', context_settings=CONTEXT_SETTINGS)
 @click.option('--output_dir', '-o', default="officequotes-json", help="Directory for output json.")
 def download(output_dir):
     '''
