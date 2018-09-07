@@ -11,8 +11,10 @@ from .fetch import fetchContent, episodeFactory
 from .parse import extractMatchingUrls
 from .constants import index_url, eps_url_regex
 
+
 class OfficeError(Exception):
     pass
+
 
 def download_all_episodes(eps_urls, eps_url_regex):
     '''

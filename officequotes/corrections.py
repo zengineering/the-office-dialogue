@@ -3,6 +3,7 @@ import click
 from pathlib import Path
 from tqdm import tqdm
 
+
 def correctNamesInJson(json_file, name_corrections):
     with open(json_file, 'r+') as f:
         episode = json.load(f)
@@ -11,6 +12,7 @@ def correctNamesInJson(json_file, name_corrections):
                                                     quote['speaker'])
         f.seek(0)
         json.dump(episode, f, indent=4, ensure_ascii=False)
+        f.truncate()
 
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])

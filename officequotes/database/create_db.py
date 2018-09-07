@@ -94,10 +94,14 @@ def create_db(db_path, json_dir):
     json_files = list(json_path_root.glob('**/the-office-S*-E*.json'))
 
     for jf in tqdm(json_files):
-        with open(jf) as f:
-            eps_dict = json.load(f)
-        addEpisodeToDb(eps_dict, speaker_ids, line_id)
-        line_id += len(eps_dict['quotes'])
+        try:
+            with open(jf) as f:
+                eps_dict = json.load(f)
+            addEpisodeToDb(eps_dict, speaker_ids, line_id)
+            line_id += len(eps_dict['quotes'])
+        except:
+            print("Problem with file {}".format(jf))
+            raise
 
     addCharactersToDb(speaker_ids)
 
