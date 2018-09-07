@@ -1,6 +1,5 @@
 import json
 import click
-import os
 from pathlib import Path
 from tqdm import tqdm
 
