@@ -2,8 +2,7 @@ import pytest
 from tempfile import NamedTemporaryFile
 from collections import namedtuple
 
-from officequotes.database import setupDbEngine
-from officequotes.database.db_interface import setupDb
+from officequotes.database import setupDb
 
 #@pytest.fixture
 #def db():
