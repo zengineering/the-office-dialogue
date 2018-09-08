@@ -1,6 +1,7 @@
 import pytest
 
 from officequotes.database import *
+from officequotes.database.clean import removeContext
 
 
 def test_db_UniqueValueDict():
@@ -36,5 +37,17 @@ def test_db_addCharactersToDb(db):
     with contextSession() as session:
         assert session.query(Character.id).count() == 4
         for char_id, char_name in zip(ids, char_names):
-            assert session.query(Character).filter(Character.id == char_id).one().name == char_name
+            db_name = session.query(Character).filter(Character.id == char_id).one().name
+            assert db_name == char_name
+
+
+@pytest.mark.parametrize('line, expected', (
+    ('[]', ''),
+    ('[a]', ''),
+    ('[a]b', 'b'),
+    ('b[a]b', 'bb'),
+    ('[a] b [a]', ' b '),
+))
+def test_db_removeContext(line, expected):
+    assert removeContext(line) == expected
 

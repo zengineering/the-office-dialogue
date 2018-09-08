@@ -6,6 +6,7 @@ from pathlib import Path
 
 from .db_interface import setupDb, getEngine
 from .tables import Character, DialogueLine, OfficeQuote
+from .clean import removeContext
 
 class UniqueValueDict():
     def __init__(self):
@@ -56,7 +57,7 @@ def addEpisodeToDb(episode, speaker_ids, base_line_id):
         [
             dict(
                 id = base_line_id + i,
-                line = quote['line']
+                line = remove_context(quote['line'])
             ) for i, quote in enumerate(episode['quotes'])
         ]
     )
@@ -79,9 +80,11 @@ def addCharactersToDb(characters):
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 @click.command('create_db', context_settings=CONTEXT_SETTINGS)
-@click.argument('json_dir', type=click.Path(exists=True))
-@click.option('db_path', '-o', default="officequotes.sqlite", type=click.Path(writable=True),
+@click.option('db_path', '-o',
+              default="officequotes.sqlite",
+              type=click.Path(writable=True),
               help="Path to output database.")
+@click.argument('json_dir', type=click.Path(exists=True))
 def create_db(db_path, json_dir):
     '''
     Insert all quotes in a dir of json files into a database
