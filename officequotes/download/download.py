@@ -48,7 +48,16 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 @click.option('--output_dir', '-o', default="officequotes-json", help="Directory for output json.")
 def download(output_dir):
     '''
-    Download all quotes from all episodes of The Office and write to csv files.
+    Download all dialogue from The Office.
+
+    Download and parse all episode pages from officequotes.net.
+
+    Store the results like so:
+
+    \b
+    OUTPUT_DIR/
+        season1/
+            the-office-S01-E01.json
     '''
 
     # set up output directory structure

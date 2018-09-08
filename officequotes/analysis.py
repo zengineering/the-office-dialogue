@@ -13,6 +13,13 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
               help="Path to output json file.")
 @click.argument('db_path', type=click.Path(readable=True))
 def total_line_counts(db_path, output_json):
+    '''
+    Count the total number of lines by each character.
+
+    Using the datbase created by officequotes.create_db,
+    produce a JSON file with each character's name,
+    database id, and total number of lines spoken.
+    '''
     setupDb(db_path)
     with contextSession() as session:
         freq = func.count(OfficeQuote.speaker_id).label('freq')

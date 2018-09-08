@@ -87,7 +87,16 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 @click.argument('json_dir', type=click.Path(exists=True))
 def create_db(db_path, json_dir):
     '''
-    Insert all quotes in a dir of json files into a database
+    Create database from JSON files.
+
+    Read all JSON files in JSON_DIR and create a sqlite database
+    from the data.
+
+    It is recovmmended to run officequotes.corrections before
+    creating the database.
+
+    JSON_DIR must be a directory of the same structure as the
+    outupt of officequotes.download
     '''
     setupDb(db_path)
     speaker_ids = UniqueValueDict()

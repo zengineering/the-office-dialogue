@@ -20,7 +20,13 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 @click.argument('json_dir', type=click.Path(exists=True))
 def corrections(json_dir):
     '''
-    Read JSON with character name corrections and update the database accordingly.
+    Make name corrections in JSON.
+
+    read officequotes/resources/name_corrections.json and
+    apply the corrections to all episode JSON files.
+
+    JSON_DIR must be a directory of the same structure as the
+    outupt of officequotes.download
     '''
     resources_root = Path(__file__).resolve().parent/"resources"
     with open(resources_root/"name_corrections.json") as f:
