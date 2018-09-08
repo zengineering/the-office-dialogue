@@ -57,7 +57,7 @@ def addEpisodeToDb(episode, speaker_ids, base_line_id):
         [
             dict(
                 id = base_line_id + i,
-                line = remove_context(quote['line'])
+                line = removeContext(quote['line'])
             ) for i, quote in enumerate(episode['quotes'])
         ]
     )
