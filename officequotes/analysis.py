@@ -1,18 +1,19 @@
 import click
 import json
 from sqlalchemy import func, desc, text
+from collections import defaultdict
 
 from .database import *
 
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
-@click.command('total_line_counts', context_settings=CONTEXT_SETTINGS)
+@click.command('line_counts', context_settings=CONTEXT_SETTINGS)
 @click.option('output_json', '-o',
-              default="total_line_counts.json",
+              default="line_counts.json",
               type=click.Path(writable=True),
               help="Path to output json file.")
 @click.argument('db_path', type=click.Path(readable=True))
-def total_line_counts(db_path, output_json):
+def line_counts(db_path, output_json):
     '''
     Count the total number of lines by each character.
 
@@ -23,18 +24,26 @@ def total_line_counts(db_path, output_json):
     setupDb(db_path)
     with contextSession() as session:
         freq = func.count(OfficeQuote.speaker_id).label('freq')
-        character_line_counts = (
+        line_counts = (
             session.query(OfficeQuote.season,
-                          OfficeQuote.episode,
-                          OfficeQuote.speaker_id,
+                          #OfficeQuote.speaker_id,
                           Character.name,
                           freq)
             .join(Character)
-            .group_by(OfficeQuote.speaker_id, OfficeQuote.season, OfficeQuote.episode)
+            .group_by(OfficeQuote.speaker_id, OfficeQuote.season)
             .all()
         )
-    #out_json = [dict(zip(('lines', 'id', 'name'), clc)) for clc in character_line_counts]
-    #with open(output_json, 'w') as f:
-    #    json.dump(out_json, f, indent=4)
-    [print(clc) for clc in character_line_counts]
+
+    char_line_counts = defaultdict(dict)
+    for season, name, line_count in line_counts:
+        char_line_counts[name][season] = line_count
+
+    char_line_counts = {name: seasons for name, seasons in char_line_counts.items()
+                             if sum(seasons.values()) > 100}
+
+    for name, seasons in char_line_counts.items():
+        print("{}: {}".format(name, sum(seasons.values())))
+
+    with open(output_json, 'w') as f:
+        json.dump(char_line_counts, f, indent=4)
 
