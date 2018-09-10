@@ -12,8 +12,9 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
               default="line_counts.json",
               type=click.Path(writable=True),
               help="Path to output json file.")
+@click.option('--min_line_count', '-m', default=100, help="Filter characters with fewer lines.")
 @click.argument('db_path', type=click.Path(readable=True))
-def line_counts(db_path, output_json):
+def line_counts(db_path, output_json, min_line_count):
     '''
     Count the total number of lines by each character.
 
@@ -26,7 +27,6 @@ def line_counts(db_path, output_json):
         freq = func.count(OfficeQuote.speaker_id).label('freq')
         line_counts = (
             session.query(OfficeQuote.season,
-                          #OfficeQuote.speaker_id,
                           Character.name,
                           freq)
             .join(Character)
@@ -34,16 +34,16 @@ def line_counts(db_path, output_json):
             .all()
         )
 
+    # parse query result into {character: {season: line count}}
     char_line_counts = defaultdict(dict)
     for season, name, line_count in line_counts:
         char_line_counts[name][season] = line_count
 
+    # filter to characters with a significant total number of lines
     char_line_counts = {name: seasons for name, seasons in char_line_counts.items()
-                             if sum(seasons.values()) > 100}
+                             if sum(seasons.values()) > min_line_count}
 
-    for name, seasons in char_line_counts.items():
-        print("{}: {}".format(name, sum(seasons.values())))
-
+    # write to json
     with open(output_json, 'w') as f:
         json.dump(char_line_counts, f, indent=4)
 
