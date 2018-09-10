@@ -1,6 +1,6 @@
 import click
 import json
-from sqlalchemy import func, desc
+from sqlalchemy import func, desc, text
 
 from .database import *
 
@@ -24,14 +24,17 @@ def total_line_counts(db_path, output_json):
     with contextSession() as session:
         freq = func.count(OfficeQuote.speaker_id).label('freq')
         character_line_counts = (
-            session.query(freq, OfficeQuote.speaker_id, Character.name)
+            session.query(OfficeQuote.season,
+                          OfficeQuote.episode,
+                          OfficeQuote.speaker_id,
+                          Character.name,
+                          freq)
             .join(Character)
-            .group_by(OfficeQuote.speaker_id)
-            .having(freq > 100)
-            .order_by(desc(freq))
+            .group_by(OfficeQuote.speaker_id, OfficeQuote.season, OfficeQuote.episode)
             .all()
         )
-    out_json = [dict(zip(('lines', 'id', 'name'), clc)) for clc in character_line_counts]
-    with open(output_json, 'w') as f:
-        json.dump(out_json, f, indent=4)
+    #out_json = [dict(zip(('lines', 'id', 'name'), clc)) for clc in character_line_counts]
+    #with open(output_json, 'w') as f:
+    #    json.dump(out_json, f, indent=4)
+    [print(clc) for clc in character_line_counts]
 
