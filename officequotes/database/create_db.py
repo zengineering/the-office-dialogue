@@ -9,6 +9,13 @@ from .db_interface import setupDb, getEngine
 from .tables import Character, DialogueLine, OfficeQuote
 
 class UniqueValueDict():
+    '''
+    Wrapper around a defaultdict.
+    Default values are based on an autoincrementing counter,
+        i.e. at the time of insert, the value is the number of
+        previously-inserted values
+
+    '''
     def __init__(self):
         self.__current = 0
         self.__items = defaultdict(self.__next_id)
@@ -39,10 +46,22 @@ class UniqueValueDict():
 
 context_regex = re.compile('\[.*?\]')
 def removeContext(line):
+    '''
+    Remove contextual descriptions from dialogue line
+    e.g. "[on phone] Hello?"
+    '''
     return re.sub(context_regex, '', line)
 
 
 def addEpisodeToDb(episode, speaker_ids, base_line_id):
+    '''
+    Add an episode to the database.
+
+    episode: dict of (season, episode number, [list of quotes]
+             quote is dict of (speaker/character, line)
+    speaker_ids: a UniqueValueDict of character names
+    base_line_id: integer offset for primary id's of DialogueLine's
+    '''
     engine = getEngine()
     conn = engine.connect()
     conn.execute(
@@ -68,6 +87,11 @@ def addEpisodeToDb(episode, speaker_ids, base_line_id):
 
 
 def addCharactersToDb(characters):
+    '''
+    Add a list of characters to the database.
+
+    characters: {character name: primary id}
+    '''
     engine = getEngine()
     conn = engine.connect()
     conn.execute(
@@ -106,9 +130,11 @@ def create_db(db_path, json_dir):
     speaker_ids = UniqueValueDict()
     line_id = 1
 
+    # glob the files
     json_path_root = Path(json_dir).resolve()
     json_files = list(json_path_root.glob('**/the-office-S*-E*.json'))
 
+    # read each file and add lines database
     for jf in tqdm(json_files):
         try:
             with open(jf) as f:
@@ -119,6 +145,7 @@ def create_db(db_path, json_dir):
             print("Problem with file {}".format(jf))
             raise
 
+    # add all characters to database
     addCharactersToDb(speaker_ids)
 
 

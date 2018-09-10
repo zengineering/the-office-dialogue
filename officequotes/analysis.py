@@ -26,9 +26,7 @@ def line_counts(db_path, output_json, min_line_count):
     with contextSession() as session:
         freq = func.count(OfficeQuote.speaker_id).label('freq')
         line_counts = (
-            session.query(OfficeQuote.season,
-                          Character.name,
-                          freq)
+            session.query(OfficeQuote.season, Character.name, freq)
             .join(Character)
             .group_by(OfficeQuote.speaker_id, OfficeQuote.season)
             .all()

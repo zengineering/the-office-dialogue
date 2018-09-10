@@ -5,6 +5,14 @@ from tqdm import tqdm
 
 
 def correctNamesInJson(json_file, name_corrections):
+    '''
+    Correct character names in JSON
+
+    Read file into JSON dict
+    Replace names if necessary
+    Write back to file
+    Remove trailing data if necessary
+    '''
     with open(json_file, 'r+') as f:
         episode = json.load(f)
         for quote in episode['quotes']:
@@ -28,13 +36,16 @@ def corrections(json_dir):
     JSON_DIR must be a directory of the same structure as the
     outupt of officequotes.download
     '''
+    # load corrections file -> { old name: new name }
     resources_root = Path(__file__).resolve().parent/"resources"
     with open(resources_root/"name_corrections.json") as f:
         name_corrections = json.load(f)
 
+    # glob all files
     json_path_root = Path(json_dir).resolve()
     json_files = list(json_path_root.glob('**/the-office-S*-E*.json'))
 
+    # make corrections in-place for each file
     for jf in tqdm(json_files):
         try:
             correctNamesInJson(jf, name_corrections)
