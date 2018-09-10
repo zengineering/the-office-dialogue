@@ -1,12 +1,12 @@
 import json
 import click
+import re
 from collections import defaultdict
 from tqdm import tqdm
 from pathlib import Path
 
 from .db_interface import setupDb, getEngine
 from .tables import Character, DialogueLine, OfficeQuote
-from .clean import removeContext
 
 class UniqueValueDict():
     def __init__(self):
@@ -36,6 +36,10 @@ class UniqueValueDict():
     def items(self):
         return self.__items.items()
 
+
+context_regex = re.compile('\[.*?\]')
+def removeContext(line):
+    return re.sub(context_regex, '', line)
 
 
 def addEpisodeToDb(episode, speaker_ids, base_line_id):

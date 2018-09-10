@@ -1,7 +1,8 @@
 import pytest
 
 from officequotes.database import *
-from officequotes.database.clean import removeContext
+from officequotes.database.create_db import (
+    UniqueValueDict, addEpisodeToDb, addCharactersToDb, removeContext)
 
 
 def test_db_UniqueValueDict():
