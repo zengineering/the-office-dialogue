@@ -1,0 +1,3 @@
+[submodule "data/json"]
+	path = data/json
+	url = git@github.com:zengineering/the-office.git
