@@ -7,14 +7,14 @@ from .database import *
 
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
-@click.command('line_counts', context_settings=CONTEXT_SETTINGS)
+@click.command('analyze', context_settings=CONTEXT_SETTINGS)
 @click.option('output_json', '-o',
               default="line_counts.json",
               type=click.Path(writable=True),
               help="Path to output json file.")
 @click.option('--min_line_count', '-m', default=100, help="Filter characters with fewer lines.")
 @click.argument('db_path', type=click.Path(readable=True))
-def line_counts(db_path, output_json, min_line_count):
+def analyze(db_path, output_json, min_line_count):
     '''
     Count the total number of lines by each character.
 
