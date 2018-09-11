@@ -1,8 +1,7 @@
-beautifulsoup4
-lxml
-requests
-SQLAlchemy
-attrs
-matplotlib
-click
-pytest
+beautifulsoup4>=4.6
+lxml>=4.2
+requests>=2.19
+SQLAlchemy>=1.2
+attrs>=18.2
+click>=6.7
+pytest>=3.8
