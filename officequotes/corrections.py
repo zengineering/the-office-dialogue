@@ -13,10 +13,18 @@ def correctNamesInJson(json_file, name_corrections):
     Write back to file
     Remove trailing data if necessary
     '''
+
+    # add in file-specific corrections, if any
+    file_specific_corrections = name_corrections['specific'].get(json_file.name, None)
+    if file_specific_corrections:
+        corrections = {**name_corrections['global'], **file_specific_corrections}
+    else:
+        corrections = name_corrections['global']
+
     with open(json_file, 'r+') as f:
         episode = json.load(f)
         for quote in episode['quotes']:
-            quote['speaker'] = name_corrections.get(quote['speaker'],
+            quote['speaker'] = corrections.get(quote['speaker'],
                                                     quote['speaker'])
         f.seek(0)
         json.dump(episode, f, indent=4, ensure_ascii=False)
