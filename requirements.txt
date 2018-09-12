@@ -5,3 +5,4 @@ SQLAlchemy>=1.2
 attrs>=18.2
 click>=6.7
 pytest>=3.8
+textblob>=0.15

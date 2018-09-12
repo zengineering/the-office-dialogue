@@ -3,6 +3,7 @@ DATA_DIR = data
 .PHONY: install
 install: requirements.txt
 	pip install -r requirements.txt
+	python -m textblob.download_corpora
 
 .PHONY: test
 test:

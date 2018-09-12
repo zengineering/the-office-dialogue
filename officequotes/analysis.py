@@ -2,8 +2,16 @@ import click
 import json
 from sqlalchemy import func, desc, text
 from collections import defaultdict
+from textblob import TextBlob
 
-from .database import *
+from .database import (OfficeQuote, Character, DialogueLine,
+                       setupDb, contextSession, create_db)
+
+
+def cleanText(string):
+    pass
+
+
 
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
