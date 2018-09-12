@@ -7,11 +7,25 @@ from textblob import TextBlob
 from .database import (OfficeQuote, Character, DialogueLine,
                        setupDb, contextSession, create_db)
 
+@click.command()
+@click.argument('db_path', type=click.Path(readable=True))
+def test(db_path):
+    setupDb(db_path)
+    print(getLinesByCharacter("Creed"))
 
-def cleanText(string):
-    pass
+def getLinesByCharacter(character_name):
+    with contextSession() as session:
+        lines = (
+            session.query(Character.name, DialogueLine.line)
+                   .filter(Character.name == character_name)
+                   .join(OfficeQuote)
+                   .join(DialogueLine)
+                   .all()
+            )
+        return [line for _, line in lines]
 
-
+def analyzeLines(lines):
+    tb = TextBlob(' '.join(lines))
 
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
