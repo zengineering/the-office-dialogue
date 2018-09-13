@@ -29,8 +29,8 @@ def contextSession(*, commit=False):
         session.close()
 
 
-def setupDb(db_path):
+def setupDb(db_path, *_, echo=False):
     global engine
-    engine = create_engine("sqlite:///{}".format(db_path), echo=False)
+    engine = create_engine("sqlite:///{}".format(db_path), echo=echo)
     Session.configure(bind=engine)
     Base.metadata.create_all(engine)
