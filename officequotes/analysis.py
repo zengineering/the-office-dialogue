@@ -42,14 +42,14 @@ def getLinesBySeasonByCharacter(character_name):
     Get a list of (line, season) for each line spoken by a character.
     '''
     with contextSession() as session:
-        lines = (session.query(Character.name, OfficeQuote.season, DialogueLine.line)
+        lines = (session.query(OfficeQuote.season, DialogueLine.line)
                         .filter(Character.name == character_name)
-                        .join(OfficeQuote)
+                        .join(Character)
                         .join(DialogueLine)
                         .all())
 
     lines_by_season = [[] for _ in range(9)]
-    for _, season, line in lines:
+    for season, line in lines:
         lines_by_season[season-1].append(line)
     return lines_by_season
 
@@ -77,41 +77,32 @@ def analyzeLines(lines_by_season):
 
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
-@click.command('analyze', context_settings=CONTEXT_SETTINGS)
+@click.command('main_characters', context_settings=CONTEXT_SETTINGS)
 @click.option('output_json', '-o',
               default="line_counts.json",
               type=click.Path(writable=True),
               help="Path to output json file.")
 @click.option('--min_line_count', '-m', default=100, help="Filter characters with fewer lines.")
 @click.argument('db_path', type=click.Path(readable=True))
-def analyze(db_path, output_json, min_line_count):
+def main_characters(db_path, output_json, min_line_count):
     '''
-    Count the total number of lines by each character.
+    Return a list of main characters.
 
-    Using the datbase created by officequotes.create_db,
-    produce a JSON file with each character's name,
-    database id, and total number of lines spoken.
+    Return a list of characters whose total number of lines is above a threshold
+    (specified with -m.).
     '''
     setupDb(db_path)
     with contextSession() as session:
         freq = func.count(OfficeQuote.speaker_id).label('freq')
-        line_counts = (
-            session.query(OfficeQuote.season, Character.name, freq)
-            .join(Character)
-            .group_by(OfficeQuote.speaker_id, OfficeQuote.season)
+        characters = (
+            session.query(Character.name)
+            .join(OfficeQuote)
+            .group_by(OfficeQuote.speaker_id)
+            .having(freq > min_line_count)
             .all()
         )
 
-    # parse query result into {character: {season: line count}}
-    char_line_counts = defaultdict(dict)
-    for season, name, line_count in line_counts:
-        char_line_counts[name][season] = line_count
-
-    # filter to characters with a significant total number of lines
-    char_line_counts = {name: seasons for name, seasons in char_line_counts.items()
-                             if sum(seasons.values()) > min_line_count}
-
-    # write to json
-    with open(output_json, 'w') as f:
-        json.dump(char_line_counts, f, indent=4)
+    # flatten the 1-element tuples and print
+    for char in sum(characters, ())):
+        print(char)
 
