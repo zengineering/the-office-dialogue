@@ -86,12 +86,13 @@ def analyze_character(db_path, names, output):
         character_names = [name.strip() for name in stdin.readlines()]
 
     analyses = {}
+    setupDb(db_path)
     for character_name in tqdm(character_names, desc="Analysis"):
-        setupDb(db_path)
         lines = getLinesBySeasonByCharacter(character_name)
-        analysis = analyzeLines(lines, name=character_name)
-        analysis['episode_count'] = getEpisodeCount(character_name)
-        analyses[character_name] = analysis
+        if lines:
+            analysis = analyzeLines(lines, name=character_name)
+            analysis['episode_count'] = getEpisodeCount(character_name)
+            analyses[character_name] = analysis
 
     with open(os.path.join(output, 'analysis.json'), 'w') as f:
         json.dump(analyses, f, indent=4)
