@@ -21,8 +21,9 @@ database:
 
 .PHONY: analysis
 analysis:
-	python -m officequotes main_characters $(DATA_DIR)/officequotes.sqlite \
-	-o $(DATA_DIR)/analysis.json
+	python -m officequotes main_characters $(DATA_DIR)/officequotes.sqlite |\
+	python -m officequotes analyze_character $(DATA_DIR)/officequotes.sqlite \
+	-o $(DATA_DIR)
 
 .PHONY: all
 all: download database analysis
