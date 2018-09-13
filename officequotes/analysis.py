@@ -4,25 +4,11 @@ from sqlalchemy import func, desc, text
 from collections import defaultdict, Counter
 from textblob import TextBlob
 from tqdm import tqdm
+from sys import stdin
+import os
 
 from .database import (OfficeQuote, Character, DialogueLine,
                        setupDb, contextSession, create_db)
-
-@click.command()
-@click.argument('db_path', type=click.Path(readable=True))
-def test(db_path):
-    setupDb(db_path)
-    print(analyzeCharacterDialogue("Michael"))
-
-
-def analyzeCharacterDialogue(character_name):
-    '''
-    Do full dialogue analysis for a character
-    '''
-    lines = getLinesBySeasonByCharacter(character_name)
-    analysis = analyzeLines(lines)
-    analysis['episode_count'] = getEpisodeCount(character_name)
-    return analysis
 
 
 def getEpisodeCount(character_name):
@@ -54,7 +40,7 @@ def getLinesBySeasonByCharacter(character_name):
     return lines_by_season
 
 
-def analyzeLines(lines_by_season):
+def analyzeLines(lines_by_season, name=None):
     '''
     Analyze a list of lines on a per-season basis.
 
@@ -64,7 +50,7 @@ def analyzeLines(lines_by_season):
     textblobs = [TextBlob(' '.join(season_lines)) for season_lines in lines_by_season]
     word_counts, sentence_counts, polarity, subjectivity = zip(
         *[(len(tb.words), len(tb.sentences), tb.sentiment.polarity, tb.sentiment.subjectivity)
-          for tb in tqdm(textblobs)])
+          for tb in tqdm(textblobs, desc=name)])
 
     return {
         'lines': [len(season_lines) for season_lines in lines_by_season],
@@ -75,16 +61,46 @@ def analyzeLines(lines_by_season):
     }
 
 
-
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
+@click.command('analyze_character', context_settings=CONTEXT_SETTINGS)
+@click.argument('db_path', type=click.Path(readable=True, resolve_path=True))
+@click.argument('names', nargs=-1, required=False)
+@click.option('--output', '-o',
+              default=os.getcwd(),
+              type=click.Path(writable=True, file_okay=False, resolve_path=True),
+              help="Path to directory for output file.")
+def analyze_character(db_path, names, output):
+    '''
+    Produce full dialogue analysis for a character.
+
+    Analyze on a per-season basis the dialogue of the specified characters.
+    Specify names after DB_PATH or via stdin.
+
+    DB_PATH: path to the database
+    NAME[S]: name of character to analyze dialogue for.
+    OUTPUT: directory in which to store output json.
+    '''
+    if names:
+        character_names = names
+    else:
+        character_names = [name.strip() for name in stdin.readlines()]
+
+    analyses = {}
+    for character_name in tqdm(character_names, desc="Analysis"):
+        setupDb(db_path)
+        lines = getLinesBySeasonByCharacter(character_name)
+        analysis = analyzeLines(lines, name=character_name)
+        analysis['episode_count'] = getEpisodeCount(character_name)
+        analyses[character_name] = analysis
+
+    with open(os.path.join(output, 'analysis.json'), 'w') as f:
+        json.dump(analyses, f, indent=4)
+
+
 @click.command('main_characters', context_settings=CONTEXT_SETTINGS)
-@click.option('output_json', '-o',
-              default="line_counts.json",
-              type=click.Path(writable=True),
-              help="Path to output json file.")
+@click.argument('db_path', type=click.Path(readable=True, resolve_path=True))
 @click.option('--min_line_count', '-m', default=100, help="Filter characters with fewer lines.")
-@click.argument('db_path', type=click.Path(readable=True))
-def main_characters(db_path, output_json, min_line_count):
+def main_characters(db_path, min_line_count):
     '''
     Return a list of main characters.
 
@@ -103,6 +119,6 @@ def main_characters(db_path, output_json, min_line_count):
         )
 
     # flatten the 1-element tuples and print
-    for char in sum(characters, ())):
+    for char in sum(characters, ()):
         print(char)
 
