@@ -5,8 +5,6 @@ from random import choice
 from officequotes.database import *
 from officequotes.analysis import getEpisodeCount, getLinesBySeason
 
-EpisodeLines = namedtuple('EpisodeLines', ('season', 'episode'))
-
 
 @pytest.fixture(scope="module")
 def db_content():
