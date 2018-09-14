@@ -38,13 +38,3 @@ def episode_dict():
         ]
     }
 
-
-Quote = namedtuple("Quote", ('season', 'episode', 'speaker', 'line', 'deleted'))
-
-@pytest.fixture
-def fmt_quote():
-    return Quote(1, 1, "Speaker{}", "Line {}", False)
-
-@pytest.fixture
-def quote():
-    return Quote(1, 1, "Speaker", "Line", False)
