@@ -23,9 +23,14 @@ def getEpisodeCount(character_name):
                         .count())
 
 
-def getLinesBySeasonByCharacter(character_name):
+def getLinesBySeason(character_name):
     '''
-    Get a list of (line, season) for each line spoken by a character.
+    Get a nested list of lines spoken by the given character in each season.
+
+    Length of the outer list is the number of seasons.
+    Length of the inner lists is the number of lines spoken in that season.
+
+    NOTE: Indexing is 0-based, so season_1 lines are at [0], etc
     '''
     with contextSession() as session:
         lines = (session.query(OfficeQuote.season, DialogueLine.line)
@@ -88,7 +93,7 @@ def analyze_character(db_path, names, output):
     analyses = {}
     setupDb(db_path)
     for character_name in tqdm(character_names, desc="Analysis"):
-        lines = getLinesBySeasonByCharacter(character_name)
+        lines = getLinesBySeason(character_name)
         if lines:
             analysis = analyzeLines(lines, name=character_name)
             analysis['episode_count'] = getEpisodeCount(character_name)
