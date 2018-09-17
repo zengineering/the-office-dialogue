@@ -5,7 +5,8 @@ from .corrections import corrections
 from .database import create_db
 from .analysis import main_characters, analyze_character
 
-@click.group(name="officequotes")
+CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
+@click.group(name="officequotes", context_settings=CONTEXT_SETTINGS)
 def top_cli(name="officequotes"):
     pass
 
