@@ -67,7 +67,7 @@ def analyzeLines(lines_by_season, name=None):
 
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
-@click.command('analyze_character', context_settings=CONTEXT_SETTINGS)
+@click.command(context_settings=CONTEXT_SETTINGS)
 @click.argument('db_path', type=click.Path(readable=True, resolve_path=True))
 @click.argument('names', nargs=-1, required=False)
 @click.option('--output', '-o',
@@ -76,7 +76,7 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
               help="Path to directory for output file.")
 def analyze_character(db_path, names, output):
     '''
-    Produce full dialogue analysis for a character.
+    Analyze all dialogue for a character.
 
     Analyze on a per-season basis the dialogue of the specified characters.
     Specify names after DB_PATH or via stdin.
@@ -103,7 +103,7 @@ def analyze_character(db_path, names, output):
         json.dump(analyses, f, indent=4)
 
 
-@click.command('main_characters', context_settings=CONTEXT_SETTINGS)
+@click.command(context_settings=CONTEXT_SETTINGS)
 @click.argument('db_path', type=click.Path(readable=True, resolve_path=True))
 @click.option('--min_line_count', '-m', default=100, help="Filter characters with fewer lines.")
 def main_characters(db_path, min_line_count):

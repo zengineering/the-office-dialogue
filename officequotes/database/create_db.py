@@ -107,7 +107,7 @@ def addCharactersToDb(characters):
 
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
-@click.command('create_db', context_settings=CONTEXT_SETTINGS)
+@click.command(context_settings=CONTEXT_SETTINGS)
 @click.option('db_path', '-o',
               default="officequotes.sqlite",
               type=click.Path(writable=True),
