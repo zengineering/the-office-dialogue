@@ -113,7 +113,7 @@ If you run them directly via Python make sure one of the following is true:
 3. PYTHONPATH is set to the root of the repo
 
 Alternatively, **officequotes.sh** should take care of that for you.
-It finds the directory it's located in, sets ```PYTHONPATH``` and calls ```console python -m officequtoes```, forwarding any arguments.
+It finds the directory it's located in, sets ```PYTHONPATH``` and calls ```console python -m officequotes```, forwarding all arguments.
 
 
 ```console
