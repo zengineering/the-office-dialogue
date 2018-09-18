@@ -28,7 +28,7 @@ dwight@dm1:-$ make install && make all
 
 
 ### Workflow
-A makefile is provided for convenience. Dive into to see the package-level commands it runs.
+A makefile is provided for convenience. Dive into it to see the package-level commands it runs.
 
 
 #### Setup
