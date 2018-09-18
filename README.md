@@ -100,3 +100,41 @@ That file already exists (and shouldn't change after running the tools), but if 
 Some of the results are visualized [here](https://zengineering.github.io/2018/06/04/the-office-dialogue.html).
 Soon I'll have a more exciting website for visualizing all of the data.
 
+
+### Details
+
+If you want more information than what/where the data is and what ```make``` commands to run, you're in the right place.
+
+There are five tools in the *officequotes* package. 
+
+If you run them via Python make sure one of the following is true: 
+1. You're in the repo's root directory
+2. The package is installed
+3. PYTHONPATH is set to the root of the repo
+
+Alternatively, **officequotes.sh** should take care of that for you.
+It finds the directory it's located in, sets ```PYTHONPATH``` and calls ```console python -m officequtoes```, forwarding any arguments.
+
+
+```console
+dwight@dm1:-$ python -m officequotes
+Usage: officequotes [OPTIONS] COMMAND [ARGS]...
+
+Options:
+  -h, --help  Show this message and exit.
+
+Commands:
+  analyze_character  Analyze all dialogue for a character.
+  corrections        Make name corrections in JSON.
+  create_db          Create database from JSON files.
+  download           Download all dialogue from The Office.
+  main_characters    Return a list of main characters.
+```
+
+#### Notables
+- *download* and *corrections* are run by ```console make download```.
+- *corrections* is based on **/officequotes/resources/name_corrections.json**, so if you've got more corrections put them in that file.
+- *corrections* and *create_db* take a directory as an argument, and expect the same structure/format as the directory produced by *download*
+- *main_characters*'s ```-m``` option can raise or lower the threshold of line count.
+- *analyze_character* takes a variable number of character names, and outputs JSON analysis for each of them. If none are specified, it reads the character names from stdin, so you can pipe the output of *main_characters* into it.
+
