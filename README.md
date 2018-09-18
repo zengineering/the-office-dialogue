@@ -95,7 +95,7 @@ The second analyzes all of the dialogue for each of the main characters, produci
 #### Results 
 
 At this point you've run all the tools, and the results are in **/data/analysis.json**.
-That file already exists (and shouldn't change after running the tools), but if you skipped the [TLDR](https://github.com/zengineering/the-office-dialogue/blob/master/README.md#tldr) you've got your own fresh copy now.
+That file already exists in the repo (and shouldn't change after running the tools), but if you skipped the [TLDR](https://github.com/zengineering/the-office-dialogue/blob/master/README.md#tldr) you've got your own fresh copy now.
 
 Some of the results are visualized [here](https://zengineering.github.io/2018/06/04/the-office-dialogue.html).
 Soon I'll have a more exciting website for visualizing all of the data.
@@ -109,11 +109,11 @@ There are five tools in the *officequotes* package.
 
 If you run them directly via Python make sure one of the following is true: 
 1. You're in the repo's root directory
-2. The package is installed
+2. The *officequotes* package is installed via pip
 3. PYTHONPATH is set to the root of the repo
 
 Alternatively, **officequotes.sh** should take care of that for you.
-It finds the directory it's located in, sets ```PYTHONPATH``` and calls ```console python -m officequotes```, forwarding all arguments.
+It finds the directory it's located in, sets ```PYTHONPATH``` and calls ```python -m officequotes```, forwarding all arguments.
 
 
 ```console
@@ -137,9 +137,8 @@ dwight@dm1:-$ python -m officequotes <command> --help
 ```
 
 #### Notables
-- *download* and *corrections* are run by ```console make download```.
+- If you have a beloved minor character (e.g. Bob Vance) and want their stats, just run ```./officequotes.sh analyze_character <name>```
 - *corrections* is based on **/officequotes/resources/name_corrections.json**, so if you've got more corrections put them in that file.
 - *corrections* and *create_db* take a directory as an argument, and expect the same structure/format as the directory produced by *download*
-- *main_characters*'s ```-m``` option can raise or lower the threshold of line count.
+- *main_characters*'s ```-m``` option specified the minimum line count that dictates who is a "main character"
 - *analyze_character* takes a variable number of character names, and outputs JSON analysis for each of them. If none are specified, it reads the character names from stdin, so you can pipe the output of *main_characters* into it.
-
