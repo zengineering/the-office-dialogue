@@ -107,7 +107,7 @@ If you want more information than what/where the data is and what ```make``` com
 
 There are five tools in the *officequotes* package. 
 
-If you run them via Python make sure one of the following is true: 
+If you run them directly via Python make sure one of the following is true: 
 1. You're in the repo's root directory
 2. The package is installed
 3. PYTHONPATH is set to the root of the repo
