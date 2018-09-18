@@ -95,7 +95,7 @@ The second analyzes all of the dialogue for each of the main characters, produci
 #### Results 
 
 At this point you've run all the tools, and the results are in **/data/analysis.json**.
-That file already exists (and shouldn't change after running the tools), but if you skipped the TLDR you've got your own fresh copy now.
+That file already exists (and shouldn't change after running the tools), but if you skipped the [TLDR](https://github.com/zengineering/the-office-dialogue/blob/master/README.md#tldr) you've got your own fresh copy now.
 
 Some of the results are visualized [here](https://zengineering.github.io/2018/06/04/the-office-dialogue.html).
 Soon I'll have a more exciting website for visualizing all of the data.
