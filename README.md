@@ -89,7 +89,7 @@ The second analyzes all of the dialogue for each of the main characters, produci
 - Number of sentences spoken.
 - Number of words spoken.
 - The polarity of the character's dialogue (negative or positive speech, on a [-1.0, 1.0] scale).
-- The subjectivity of the character's dialgoue (0.0 being completely objective up to 1.0 being completely subjective).
+- The subjectivity of the character's dialgoue on a scale from 0.0 (completely objective) up to 1.0 (completely subjective).
 
 
 #### Results 
@@ -129,6 +129,11 @@ Commands:
   create_db          Create database from JSON files.
   download           Download all dialogue from The Office.
   main_characters    Return a list of main characters.
+```
+
+To get help and a more detailed description of each tool, run:
+```console
+dwight@dm1:-$ python -m officequotes <command> --help
 ```
 
 #### Notables
