@@ -83,7 +83,7 @@ dwight@dm1:-$ make analysis
 ```
 
 This runs two tools.
-The first produces a list of "main character", i.e. characters that have more than 100 lines of dialogue througout the series.
+The first produces a list of "main characters", i.e. characters that have more than 100 lines of dialogue througout the series.
 The second analyzes all of the dialogue for each of the main characters, producing (for each season): 
 - Number of lines spoken.
 - Number of sentences spoken.
