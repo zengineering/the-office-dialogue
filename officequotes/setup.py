@@ -16,6 +16,6 @@ setup(
     ],
     entry_points='''
         [console_scripts]
-        officequotes=officequotes:cli
+        officequotes=officequotes:top_cli
     ''',
 )
