@@ -52,7 +52,7 @@ This runs the tests in **tests/** via [pytest](https://docs.pytest.org/en/latest
 
 
 #### Download
-For this repo, **/data/json** is actual a [submodule](https://github.com/zengineering/the-office), so there isn't *really* a need to run this step.
+The dialogue text to be analyzed is in a [submodule](https://github.com/zengineering/the-office) under **/data/json**, so there isn't *really* a need to run this step.
 If you like your data fresh though, make sure you've got an internet connection and run
 
 ```console
